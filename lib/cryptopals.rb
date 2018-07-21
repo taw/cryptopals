@@ -1,3 +1,5 @@
+require_relative "english"
+
 Dir["#{__dir__}/chal*.rb"].each do |path|
   require path
 end
@@ -5,6 +7,9 @@ end
 class String
   def unpack_hex
     [self].pack("H*")
-    # scan(/../).map{|x| x.to_i(16).chr}.join
+  end
+
+  def pack_hex
+    self.unpack("H*")
   end
 end
