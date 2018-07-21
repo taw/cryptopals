@@ -36,4 +36,10 @@ describe Chal12 do
       expect(chal.ecb?(random_box)).to eq(false)
     end
   end
+
+  describe "#guess_first_char" do
+    it do
+      expect(chal.guess_first_char(chal.box)).to eq("R")
+    end
+  end
 end

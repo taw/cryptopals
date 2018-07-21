@@ -15,7 +15,7 @@ class Chal12
     proc do |txt|
       crypt = OpenSSL::Cipher.new("AES-128-ECB")
       crypt.encrypt
-      crypt.key = random_key
+      crypt.key = key
       crypt.update(txt + Base64.decode64(unknown_string)) + crypt.final
     end
   end
@@ -37,5 +37,17 @@ class Chal12
     encrypted = box.call("A" * 100)
     slices = encrypted.chars.each_slice(16).map(&:join)
     slices.size != slices.uniq.size
+  end
+
+  def guess_first_char(box)
+    block_size = detect_block_size(box)
+    raise unless ecb?(box)
+    prefix = "A" * (block_size - 1)
+    target = box.call(prefix)[0, block_size]
+    (0..255).each do |i|
+      block = box.call(prefix + [i].pack("C"))[0, block_size]
+      return i.chr if block == target
+    end
+    raise "FAILED!"
   end
 end
