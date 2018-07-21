@@ -42,12 +42,28 @@ class Chal12
   def guess_first_char(box)
     block_size = detect_block_size(box)
     raise unless ecb?(box)
-    prefix = "A" * (block_size - 1)
+    guess_next_byte(box, block_size, "")
+  end
+
+  def guess_first_block(box)
+    block_size = detect_block_size(box)
+    raise unless ecb?(box)
+
+    known = ""
+    block_size.times do |k|
+      known << guess_next_byte(box, block_size, known)
+    end
+    known
+  end
+
+  private def guess_next_byte(box, block_size, known)
+    prefix = "A" * (block_size - known.size - 1)
     target = box.call(prefix)[0, block_size]
     (0..255).each do |i|
-      block = box.call(prefix + [i].pack("C"))[0, block_size]
+      block = box.call(prefix + known + [i].pack("C"))[0, block_size]
       return i.chr if block == target
     end
+    binding.pry
     raise "FAILED!"
   end
 end

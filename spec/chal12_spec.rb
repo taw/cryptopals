@@ -42,4 +42,10 @@ describe Chal12 do
       expect(chal.guess_first_char(chal.box)).to eq("R")
     end
   end
+
+  describe "#guess_first_block" do
+    it do
+      expect(chal.guess_first_block(chal.box)).to eq("Rollin' in my 5.")
+    end
+  end
 end
