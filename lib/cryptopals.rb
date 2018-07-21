@@ -10,6 +10,6 @@ class String
   end
 
   def pack_hex
-    self.unpack("H*")
+    self.unpack("H*")[0]
   end
 end
