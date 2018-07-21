@@ -7,4 +7,15 @@ describe Chal6 do
       expect(Chal6.new.hamming_distance(a,b)).to eq(37)
     end
   end
+
+  describe "#repeated_edit_distance" do
+
+    it do
+
+    end
+  end
+
+  describe "#guess_keysize" do
+
+  end
 end
