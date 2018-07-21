@@ -1,5 +1,3 @@
-require "set"
-
 class Chal8
   def likely_ecb?(sample)
     n = 0

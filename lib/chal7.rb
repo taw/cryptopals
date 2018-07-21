@@ -1,5 +1,3 @@
-require "openssl"
-
 class Chal7
   def decode(encrypted, key)
     decipher = OpenSSL::Cipher.new("AES-128-ECB")
