@@ -39,31 +39,62 @@ class Chal12
     slices.size != slices.uniq.size
   end
 
-  def guess_first_char(box)
+  def crack_first_char(box)
     block_size = detect_block_size(box)
     raise unless ecb?(box)
-    guess_next_byte(box, block_size, "")
+    crack_next_byte(box, block_size, "")
   end
 
-  def guess_first_block(box)
+  def crack_first_block(box)
     block_size = detect_block_size(box)
     raise unless ecb?(box)
 
     known = ""
     block_size.times do |k|
-      known << guess_next_byte(box, block_size, known)
+      known << crack_next_byte(box, block_size, known)
     end
     known
   end
 
-  private def guess_next_byte(box, block_size, known)
-    prefix = "A" * (block_size - known.size - 1)
-    target = box.call(prefix)[0, block_size]
+  def message_size(box)
+    i = 0
+    sz = box.call("").size
+    while true
+      sz2 = box.call("A" * i).size
+      if sz2 != sz
+        # There's always minimum padding of 1
+        return sz - i
+      end
+      i += 1
+    end
+  end
+
+  def crack_message(box)
+    block_size = detect_block_size(box)
+    raise unless ecb?(box)
+    message_size = message_size(box)
+
+    known = ""
+    message_size.times do |k|
+      known << crack_next_byte(box, block_size, known)
+    end
+    # strip padding
+    known
+  end
+
+  private def crack_next_byte(box, block_size, known)
+    prefix_size = block_size - known.size - 1
+    block_index = 0
+    while prefix_size < 0
+      prefix_size += block_size
+      block_index += 1
+    end
+    prefix = "A" * prefix_size
+    target = box.call(prefix)[block_index * block_size, block_size]
     (0..255).each do |i|
-      block = box.call(prefix + known + [i].pack("C"))[0, block_size]
+      block = box.call(prefix + known + [i].pack("C"))[block_index * block_size, block_size]
       return i.chr if block == target
     end
-    binding.pry
     raise "FAILED!"
   end
 end

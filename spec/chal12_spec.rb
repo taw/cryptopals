@@ -37,15 +37,32 @@ describe Chal12 do
     end
   end
 
-  describe "#guess_first_char" do
+  describe "#message_size" do
     it do
-      expect(chal.guess_first_char(chal.box)).to eq("R")
+      expect(chal.message_size(chal.box)).to eq(138)
     end
   end
 
-  describe "#guess_first_block" do
+  describe "#crack_first_char" do
     it do
-      expect(chal.guess_first_block(chal.box)).to eq("Rollin' in my 5.")
+      expect(chal.crack_first_char(chal.box)).to eq("R")
+    end
+  end
+
+  describe "#crack_first_block" do
+    it do
+      expect(chal.crack_first_block(chal.box)).to eq("Rollin' in my 5.")
+    end
+  end
+
+  describe "#crack_message" do
+    it do
+      expect(chal.crack_message(chal.box)).to eq(
+        "Rollin' in my 5.0\n"+
+        "With my rag-top down so my hair can blow\n"+
+        "The girlies on standby waving just to say hi\n"+
+        "Did you stop? No, I just drove by\n"
+      )
     end
   end
 end
