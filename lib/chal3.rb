@@ -1,4 +1,4 @@
-class XorCracker
+class Chal3
   def initialize(input)
     @input = input
   end
@@ -11,6 +11,6 @@ class XorCracker
     (0..255).map{|key|
       decoded = xor(@input, key)
       [English.score(decoded), key, decoded]
-    }.sort[0][2]
+    }.sort[0][1,2]
   end
 end

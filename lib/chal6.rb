@@ -21,4 +21,22 @@ class Chal6
   def guess_keysize(str)
     (2..40).min_by{|k| repeated_edit_distance(str, k) }
   end
+
+  def call(str)
+    keysize = guess_keysize(str)
+    slices = (0...keysize).map do |i|
+      slice = ""
+      while i < str.size
+        slice << str[i]
+        i += keysize
+      end
+      slice
+    end
+
+    decoded_slices = slices.map{|slice| Chal3.new(slice).call }
+    key = decoded_slices.map{|k,s| k.chr}.join
+    decoded = (0...str.size).map{|i| decoded_slices[i % keysize][1][i / keysize]}.join
+
+    [key, decoded]
+  end
 end
