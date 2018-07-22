@@ -9,12 +9,16 @@ Dir["#{__dir__}/chal*.rb"].each do |path|
 end
 
 class String
-  def unpack_hex
+  def from_hex
     [self].pack("H*")
   end
 
-  def pack_hex
+  def to_hex
     self.unpack("H*")[0]
+  end
+
+  def to_hex_pretty
+    self.unpack("C*").map{|x| "%02x" % x}.join(" ")
   end
 end
 
@@ -28,5 +32,25 @@ class Integer
       n >>= 1
     end
     result
+  end
+end
+
+module AES
+  def self.encrypt_block(block, key)
+    raise unless block.size == 16 and key.size == 16
+    decipher = OpenSSL::Cipher.new("AES-128-ECB")
+    decipher.encrypt
+    decipher.padding = 0
+    decipher.key = key
+    decipher.update(block) + decipher.final
+  end
+
+  def self.decrypt_block(block, key)
+    raise unless block.size == 16 and key.size == 16
+    decipher = OpenSSL::Cipher.new("AES-128-ECB")
+    decipher.decrypt
+    decipher.padding = 0
+    decipher.key = key
+    decipher.update(block) + decipher.final
   end
 end

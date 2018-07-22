@@ -1,12 +1,4 @@
 class Chal10
-  def decode_block(block, key)
-    decipher = OpenSSL::Cipher.new("AES-128-ECB")
-    decipher.decrypt
-    decipher.padding = 0
-    decipher.key = key
-    decipher.update(block) + decipher.final
-  end
-
   def xor(s1, s2)
     raise unless s1.size == s2.size
     (0...s1.size).map{|i| (s1[i].ord ^ s2[i].ord).chr }.join
@@ -22,7 +14,7 @@ class Chal10
       slice = encrypted[n, 16]
       break if slice.empty?
       raise if slice.size != 16
-      decoded = decode_block(slice, key)
+      decoded = AES.decrypt_block(slice, key)
       result << xor(decoded, chain_val)
       chain_val = slice
       n += 16

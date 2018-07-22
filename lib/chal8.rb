@@ -13,6 +13,6 @@ class Chal8
   end
 
   def call(samples)
-    samples.select{|sample| likely_ecb?(sample)}.map(&:pack_hex)
+    samples.select{|sample| likely_ecb?(sample)}.map(&:to_hex)
   end
 end

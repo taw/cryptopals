@@ -10,6 +10,6 @@ describe Chal5 do
   }
 
   it do
-    expect(Chal5.new.call(input, key).pack_hex).to eq(output)
+    expect(Chal5.new.call(input, key).to_hex).to eq(output)
   end
 end
