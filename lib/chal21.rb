@@ -3,6 +3,8 @@ class Chal21
     @x.dup
   end
 
+  attr_reader :index
+
   def initialize
     @x = [0] * n
     @index = n+1 # Special fake value
@@ -17,14 +19,14 @@ class Chal21
   end
 
   def extract_number
-    if index >= n
-      if index > n
+    if @index >= n
+      if @index > n
         raise "RNG was never seeded"
       end
       twist
     end
 
-    y = @x[index]
+    y = @x[@index]
     y ^= ((y >> u) & d)
     y ^= ((y << s) & b)
     y ^= ((y << t) & c)
@@ -46,6 +48,7 @@ class Chal21
       end
       @x[i] = @x[(i + m) % n] ^ xa
     end
+    @index = 0
   end
 
   ### Derived constants
