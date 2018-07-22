@@ -17,3 +17,16 @@ task "create", [:number] do |t, args|
     spec_file.write("describe Chal#{number} do\nend\n")
   end
 end
+
+desc "Print done status"
+task "status" do
+  done = (1..64).select{|i|
+    path=Pathname("#{__dir__}/spec/chal#{i}_spec.rb")
+    path.exist? and path.read =~ /expect/
+  }.to_set
+  (1..64).each_slice(8).each do |slice|
+    puts slice.map{|i|
+      done.include?(i) ? "[%02d]" % i : "[  ]"
+    }.join(" ")
+  end
+end
