@@ -19,4 +19,8 @@ class Chal18
     end
     decoded
   end
+
+  def encode(str, key, nonce)
+    decode(str, key, nonce)
+  end
 end
