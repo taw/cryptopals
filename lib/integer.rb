@@ -40,4 +40,9 @@ class Integer
     raise "The maths are broken!" unless g == 1
     x % et
   end
+
+  def root(n)
+    raise "Can't integer root negative number" if n < 0
+    (0..self).bsearch{|i| self - i**n }
+  end
 end
