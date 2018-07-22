@@ -24,9 +24,13 @@ task "status" do
     path=Pathname("#{__dir__}/spec/chal#{i}_spec.rb")
     path.exist? and path.read =~ /expect/
   }.to_set
+
   (1..64).each_slice(8).each do |slice|
     puts slice.map{|i|
       done.include?(i) ? "[%02d]" % i : "[  ]"
     }.join(" ")
   end
+
+  puts ""
+  puts "Total: #{done.size}/64 done"
 end
