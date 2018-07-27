@@ -6,17 +6,10 @@ class Chal12
     YnkK"
   end
 
-  def random_key
-    (0..15).map{ rand(256) }.pack("C*")
-  end
-
   def box
-    key = random_key
+    key = AES.random_key
     proc do |txt|
-      crypt = OpenSSL::Cipher.new("AES-128-ECB")
-      crypt.encrypt
-      crypt.key = key
-      crypt.update(txt + Base64.decode64(unknown_string)) + crypt.final
+      AES.encrypt_ecb(txt + Base64.decode64(unknown_string), key)
     end
   end
 

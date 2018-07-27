@@ -1,31 +1,20 @@
 class Chal11
-  def random_key
-    (0..15).map{ rand(256) }.pack("C*")
-  end
-
   def random_padding
     rand(5..10).times.map{ rand(256) }.pack("C*")
   end
 
   def cbc_box
-    key = random_key
-    iv = random_key
+    key = AES.random_key
+    iv = AES.random_key
     proc do |str|
-      crypt = OpenSSL::Cipher.new("AES-128-CBC")
-      crypt.encrypt
-      crypt.key = key
-      crypt.iv = iv
-      crypt.update(random_padding + str + random_padding) + crypt.final
+      AES.encrypt_cbc(random_padding + str + random_padding, key, iv)
     end
   end
 
   def ecb_box
-    key = random_key
+    key = AES.random_key
     proc do |str|
-      crypt = OpenSSL::Cipher.new("AES-128-ECB")
-      crypt.encrypt
-      crypt.key = key
-      crypt.update(random_padding + str + random_padding) + crypt.final
+      AES.encrypt_ecb(random_padding + str + random_padding, key)
     end
   end
 
