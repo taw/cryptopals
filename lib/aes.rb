@@ -43,5 +43,13 @@ module AES
       crypt.key = key
       crypt.update(msg) + crypt.final
     end
+
+    def decrypt_cbc(msg, key, iv)
+      crypt = OpenSSL::Cipher.new("AES-128-CBC")
+      crypt.decrypt
+      crypt.key = key
+      crypt.iv = iv
+      crypt.update(msg) + crypt.final
+    end
   end
 end
