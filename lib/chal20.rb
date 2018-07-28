@@ -16,7 +16,7 @@ class Chal20
     decrypted
   end
 
- def guess_key(input)
+  def guess_key(input)
     (0..255).map{|key|
       decoded = input.map{|u| u^key}.pack("C*")
       [English.score(decoded), key, decoded]
