@@ -134,8 +134,26 @@ class Chal34
   end
 
   class ParameterInjectionMitmNetwork
+    attr_reader :received_msg1, :received_msg2, :key
+
     def call(client, server)
-      # ...
+      @key = Digest::SHA1.digest(0.to_s(16).from_hex)[0,16]
+
+      # round 1
+      @p, @g, @ga = client.round_1_send
+      server.round_1_recv [@p, @g, @p]
+
+      # round 2
+      @gb = server.round_2_send
+      client.round_2_recv @p
+
+      # round 3
+      @received_msg1 = DH.decrypt(client.round_3_send, @key)
+      server.round_3_recv DH.encrypt(@received_msg1, @key)
+
+      # round 4
+      @received_msg2 = DH.decrypt(server.round_4_send, @key)
+      client.round_4_recv DH.encrypt(@received_msg2, @key)
     end
   end
 end
