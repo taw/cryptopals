@@ -1,3 +1,5 @@
+require "pathname"
+
 desc "Create files for challenge"
 task "create", [:number] do |t, args|
   number = args[:number]

@@ -1,6 +1,7 @@
 require "base64"
 require "set"
 require "openssl"
+require "bigdecimal"
 
 require_relative "integer"
 require_relative "string"
