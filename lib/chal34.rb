@@ -106,8 +106,30 @@ class Chal34
   end
 
   class TraditionalMitmNetwork
+    attr_reader :received_msg1, :received_msg2, :client_key, :server_key
+
     def call(client, server)
-      # ...
+      # round 1
+      @p, @g, @ga = client.round_1_send
+      @fa = rand(@p)
+      @gfa = @g.powmod(@fa, @p)
+      server.round_1_recv [@p, @g, @gfa]
+
+      # round 2
+      @gb = server.round_2_send
+      @fb = rand(@p)
+      @gfb = @g.powmod(@fb, @p)
+      client.round_2_recv @gfb
+      @client_key = DH.derive_key(@fb, @ga, @p)
+      @server_key = DH.derive_key(@fa, @gb, @p)
+
+      # round 3
+      @received_msg1 = DH.decrypt(client.round_3_send, @client_key)
+      server.round_3_recv DH.encrypt(@received_msg1, @server_key)
+
+      # round 4
+      @received_msg2 = DH.decrypt(server.round_4_send, @server_key)
+      client.round_4_recv DH.encrypt(@received_msg2, @client_key)
     end
   end
 
