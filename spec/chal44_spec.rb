@@ -26,7 +26,10 @@ describe Chal44 do
 
   let(:private_key_sha1) { "ca8f6f7c66fa362d40760d135b763eb8527d3d52" }
 
+  let(:chal) { Chal44.new }
   it do
-    samples
+    private_key = chal.hack(public_key, samples)
+    expect(private_key.public_key).to eq(public_key)
+    expect(Digest::SHA1.hexdigest(private_key.x.to_s(16))).to eq(private_key_sha1)
   end
 end
