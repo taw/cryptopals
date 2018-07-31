@@ -3,8 +3,8 @@ class Chal34
     def initialize
       @msg = AES.random_key # Just somwe random bytes
       @p = DH.nist_prime
+      @a = random_secret
       @g = 2
-      @a = rand(@p)
     end
 
     def round_1_send
@@ -28,6 +28,10 @@ class Chal34
 
     private
 
+    def random_secret
+      rand(@p)
+    end
+
     def ga
       @g.powmod(@a, @p)
     end
@@ -42,7 +46,7 @@ class Chal34
     end
 
     def round_2_send
-      @b = rand(@p)
+      @b = random_secret
       @key = DH.derive_key(@b, @ga, @p)
       gb
     end
@@ -57,6 +61,10 @@ class Chal34
     end
 
     private
+
+    def random_secret
+      rand(@p)
+    end
 
     def gb
       @g.powmod(@b, @p)

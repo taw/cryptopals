@@ -8,6 +8,29 @@ class Chal35
   Server = Chal34::Server
   Network = Chal34::Network
 
+  class ClientOdd < Client
+    def random_secret
+      super | 1
+    end
+  end
+
+  class ClientEven < Client
+    def random_secret
+      super & ~1
+    end
+  end
+
+  class ServerOdd < Server
+    def random_secret
+      super | 1
+    end
+  end
+
+  class ServerEven < Server
+    def random_secret
+      super & ~1
+    end
+  end
 
   # Just injecting g will not affect server key at all
   # unless we also change A to match the new g
@@ -77,8 +100,6 @@ class Chal35
       # round 2
       @gb = server.round_2_send
       client.round_2_recv @gb
-
-      p [client.instance_eval{ @a }.even?, server.instance_eval{ @b }.even?]
 
       # round 3
       @received_msg1 = DH.decrypt(client.round_3_send, @key)
