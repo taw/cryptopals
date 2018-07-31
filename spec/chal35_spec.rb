@@ -46,17 +46,18 @@ describe Chal35 do
     end
   end
 
-  # describe Chal35::GInjectionNetworkPminus1 do
-  #   let(:network) { Chal35::GInjectionNetworkPminus1.new }
-  #   it do
-  #     network.call(alice, bob)
-  #     expect(alice_key).to eq(network.key)
-  #     expect(bob_key).to eq(network.key)
-  #     expect(alice_key).to eq(bob_key)
-  #     expect(alice_msg).to eq(network.received_msg1)
-  #     expect(network.received_msg1).to eq(bob_received_msg)
-  #     expect(bob_received_msg).to eq(network.received_msg2)
-  #     expect(network.received_msg2).to eq(alice_received_msg)
-  #   end
-  # end
+  describe Chal35::GInjectionNetworkPminus1 do
+    let(:network) { Chal35::GInjectionNetworkPminus1.new }
+
+    it do
+      network.call(alice, bob)
+      expect(alice_key).to eq(network.key)
+      expect(bob_key).to eq(network.key)
+      expect(alice_key).to eq(bob_key)
+      expect(alice_msg).to eq(network.received_msg1)
+      expect(network.received_msg1).to eq(bob_received_msg)
+      expect(bob_received_msg).to eq(network.received_msg2)
+      expect(network.received_msg2).to eq(alice_received_msg)
+    end
+  end
 end

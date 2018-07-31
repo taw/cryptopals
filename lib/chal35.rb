@@ -18,6 +18,8 @@ class Chal35
     attr_reader :received_msg1, :received_msg2, :key
 
     def call(client, server)
+      @key = Digest::SHA1.digest(1.to_s(16).from_hex)[0,16]
+
       # round 1
       @p, @g, @ga = client.round_1_send
       server.round_1_recv [@p, 1, 1]
@@ -26,18 +28,11 @@ class Chal35
       @gb = server.round_2_send
       client.round_2_recv @gb
 
-      # This makes gB == 1
-      # and so alice s == 1
-      # however server key is not affected by this attack
-
-      # @key = Digest::SHA1.digest(0.to_s(16).from_hex)[0,16]
-      @key = DH.derive_key(1, 1, @p)
-
-      # # round 3
+      # round 3
       @received_msg1 = DH.decrypt(client.round_3_send, @key)
       server.round_3_recv DH.encrypt(@received_msg1, @key)
 
-      # # round 4
+      # round 4
       @received_msg2 = DH.decrypt(server.round_4_send, @key)
       client.round_4_recv DH.encrypt(@received_msg2, @key)
     end
@@ -47,6 +42,8 @@ class Chal35
     attr_reader :received_msg1, :received_msg2, :key
 
     def call(client, server)
+      @key = Digest::SHA1.digest(0.to_s(16).from_hex)[0,16]
+
       # round 1
       @p, @g, @ga = client.round_1_send
       server.round_1_recv [@p, @p, 0]
@@ -55,14 +52,39 @@ class Chal35
       @gb = server.round_2_send
       client.round_2_recv @gb
 
-      # @key = Digest::SHA1.digest(0.to_s(16).from_hex)[0,16]
-      @key = DH.derive_key(1, 0, @p)
-
-      # # round 3
+      # round 3
       @received_msg1 = DH.decrypt(client.round_3_send, @key)
       server.round_3_recv DH.encrypt(@received_msg1, @key)
 
-      # # round 4
+      # round 4
+      @received_msg2 = DH.decrypt(server.round_4_send, @key)
+      client.round_4_recv DH.encrypt(@received_msg2, @key)
+    end
+  end
+
+  # It has 50% chance of working
+  # Whenever server secret is even
+  class GInjectionNetworkPminus1
+    attr_reader :received_msg1, :received_msg2, :key
+
+    def call(client, server)
+      @key = Digest::SHA1.digest(1.to_s(16).from_hex)[0,16]
+
+      # round 1
+      @p, @g, @ga = client.round_1_send
+      server.round_1_recv [@p, @p-1, @p-1]
+
+      # round 2
+      @gb = server.round_2_send
+      client.round_2_recv @gb
+
+      p [client.instance_eval{ @a }.even?, server.instance_eval{ @b }.even?]
+
+      # round 3
+      @received_msg1 = DH.decrypt(client.round_3_send, @key)
+      server.round_3_recv DH.encrypt(@received_msg1, @key)
+
+      # round 4
       @received_msg2 = DH.decrypt(server.round_4_send, @key)
       client.round_4_recv DH.encrypt(@received_msg2, @key)
     end
