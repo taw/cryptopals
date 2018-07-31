@@ -77,6 +77,10 @@ module DSA
       DSA.hash(msg)
     end
 
+    def group
+      public_key.group
+    end
+
     def p
       public_key.p
     end
