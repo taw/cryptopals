@@ -42,10 +42,6 @@ module RSA
         return false
         # Definitely too big
       end
-      if signature * (2 ** 16) < n
-        return false
-        # Definitely too small
-      end
       decoded = "000" + signature.powmod(e, n).to_s(16)
       return false unless decoded.size.even?
       decoded = decoded.from_hex.unpack("C*")
