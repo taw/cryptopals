@@ -10,6 +10,7 @@ require_relative "aes"
 require_relative "english"
 require_relative "dh"
 require_relative "dsa"
+require_relative "rsa"
 
 Dir["#{__dir__}/chal*.rb"].each do |path|
   require path
