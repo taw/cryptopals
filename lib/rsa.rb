@@ -4,7 +4,7 @@ module RSA
       n.to_s(2).size / 8
     end
 
-    def sign
+    def sign(msg)
       pad_message(msg).powmod(d, n)
     end
 
@@ -20,20 +20,41 @@ module RSA
   end
 
   class PublicKey < Struct.new(:n, :e)
+    def signature_size
+      n.to_s(2).size / 8
+    end
+
     def valid?(signature, msg)
-      raise "Signature too big" if signature > n
-      raise "Signature too small" if signature * (2 ** 16) < n
-      decoded = signature.powmod(d, n)
+      if signature > n
+        return false
+        # Definitely too big
+      end
+      decoded = signature.powmod(e, n)
       hash = Digest::SHA1.hexdigest(msg)
       ffs = signature_size - hash.size/2 - 3
       expected = "0001" + "ff" * ffs + "00" + hash
-      expected == decoded
+      expected.to_i(16) == decoded
     end
 
+    # This is the vulnerable algorithm
     def kinda_valid?(signature, msg)
-      raise "Signature too big" if signature > n
-      raise "Signature too small" if signature * (2 ** 16) < n
-      binding.pry
+      if signature > n
+        return false
+        # Definitely too big
+      end
+      if signature * (2 ** 16) < n
+        return false
+        # Definitely too small
+      end
+      decoded = "000" + signature.powmod(e, n).to_s(16)
+      return false unless decoded.size.even?
+      decoded = decoded.from_hex.unpack("C*")
+      return false unless decoded.shift == 0
+      return false unless decoded.shift == 1
+      decoded.shift while decoded[0] == 255
+      return false unless decoded.shift == 0
+      hash = Digest::SHA1.hexdigest(msg)
+      hash == decoded.pack("C*").to_hex[0,40]
     end
   end
 
