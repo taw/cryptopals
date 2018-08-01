@@ -19,12 +19,13 @@ module DSA
     def sign(msg)
       k = rand(2...group.q)
       h = DSA.hash(msg)
-      while true
+      100.times do
         r = group.g.powmod(k, group.p) % group.q
         s = (k.invmod(q) * (h + x*r)) % q
         next if r == 0 or s == 0
         return Signature.new(public_key, msg, r, s)
       end
+      raise "Failed to generate signature too many times"
     end
 
     def p
