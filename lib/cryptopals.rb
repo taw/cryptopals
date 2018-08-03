@@ -12,6 +12,6 @@ require_relative "dh"
 require_relative "dsa"
 require_relative "rsa"
 
-Dir["#{__dir__}/chal*.rb"].each do |path|
+Dir["#{__dir__}/chal*.rb"].sort_by{|x| x[/\d+/].to_i }.each do |path|
   require path
 end
