@@ -79,4 +79,41 @@ class Chal38
       server.round_3_recv client.round_3_send
     end
   end
+
+  class FakeServer < BadSRP
+    def round_1_recv(msg)
+      @email, @ga = msg
+      @salt = Random::DEFAULT.bytes(16)
+    end
+
+    def round_2_send
+      @b = rand(2...n)
+      @gb = g.powmod(@b, n)
+      @u = rand(2**128)
+      [@salt, @gb, @u]
+    end
+
+    def round_3_recv(msg)
+      gab = @ga.powmod(@b, n)
+      words.each do |candidate_password|
+        x = hash(@salt + candidate_password) # can be precomputed
+        vub = g.powmod(x*@u*@b, n) # can be precomputed
+        s = (gab * vub) % n
+        k = hash(s)
+        if msg == hmac(k, @salt)
+          @password = candidate_password
+          return "OK"
+        end
+      end
+      raise "Bad password"
+    end
+
+    def dict_path
+      "/usr/share/dict/words"
+    end
+
+    def words
+      Pathname(dict_path).readlines.map(&:chomp)
+    end
+  end
 end

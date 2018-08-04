@@ -23,4 +23,13 @@ describe Chal38 do
       expect(session).to eq("OK")
     end
   end
+
+  describe "MITM attack" do
+    let(:server) { Chal38::FakeServer.new }
+    let(:client) { Chal38::Client.new("alice", "aardvark") }
+    it do
+      expect(session).to eq("OK")
+      # b, B, u, and salt
+    end
+  end
 end
