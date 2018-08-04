@@ -96,7 +96,7 @@ class Chal38
     def round_3_recv(msg)
       gab = @ga.powmod(@b, n)
       words.each do |candidate_password|
-        x = hash(@salt + candidate_password) # can be precomputed
+        x = hash(@salt + candidate_password.b) # can be precomputed
         vub = g.powmod(x*@u*@b, n) # can be precomputed
         s = (gab * vub) % n
         k = hash(s)
