@@ -24,4 +24,14 @@ describe Chal23 do
       end
     end
   end
+
+  describe "clone" do
+    let(:seed) { rand(2**32) }
+    let(:rng) {  Chal21.new.tap{|rng| rng.seed(seed) } }
+
+    it do
+      cloned = chal.clone(rng)
+      expect(cloned.state).to eq(rng.state)
+    end
+  end
 end

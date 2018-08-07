@@ -36,6 +36,18 @@ class Chal23
     solver.model[y].to_s.to_i
   end
 
+  def clone(rng)
+    numbers = n.times.map{ rng.extract_number }
+    cloned_state = numbers.map{|x| untemper(x) }
+    cloned_rng = Chal21.new
+    cloned_rng.instance_eval do
+      @index = n
+      @x = cloned_state.dup
+      @initialized = true
+    end
+    cloned_rng
+  end
+
   ### Various constants, same as Chal21
   def w
     32
