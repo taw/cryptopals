@@ -10,4 +10,18 @@ describe Chal23 do
       end
     end
   end
+
+  # It's possible to invert the GF(2) 32x32 matrix of #temper function
+  # Or we could just skip all that hard work and use Z3 to do it for us ;-)
+  describe "untemper" do
+    it do
+      100.times do
+        y = rand(2**32)
+        x = chal.temper(y)
+        z = chal.untemper(x)
+        expect(chal.temper(z)).to eq(x)
+        expect(z).to eq(y)
+      end
+    end
+  end
 end

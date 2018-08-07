@@ -23,7 +23,17 @@ class Chal23
   end
 
   def untemper(x)
-    raise "TODO"
+    y = Z3::Bitvec("y", 32)
+    expr = y
+    expr ^= ((expr .unsigned_rshift u) & d)
+    expr ^= ((expr << s) & b)
+    expr ^= ((expr << t) & c)
+    expr ^= (expr .unsigned_rshift l)
+    expr = expr & 0xFFFF_FFFF
+    solver = Z3::Solver.new
+    solver.assert expr == x
+    raise unless solver.satisfiable?
+    solver.model[y].to_s.to_i
   end
 
   ### Various constants, same as Chal21

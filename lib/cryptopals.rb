@@ -3,6 +3,7 @@ require "set"
 require "openssl"
 require "bigdecimal"
 require "pry"
+require "z3"
 
 require_relative "integer"
 require_relative "string"
