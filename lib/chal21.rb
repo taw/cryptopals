@@ -7,10 +7,11 @@ class Chal21
 
   def initialize
     @x = [0] * n
-    @index = n+1 # Special fake value
+    @initialized = false
   end
 
   def seed(v)
+    @initialized = true
     @x[0] = v
     (1..n-1).each do |i|
       @x[i] = (f * (@x[i-1] ^ (@x[i-1] >> (w-2))) + i) & 0xFFFF_FFFF
@@ -19,13 +20,8 @@ class Chal21
   end
 
   def extract_number
-    if @index >= n
-      if @index > n
-        raise "RNG was never seeded"
-      end
-      twist
-    end
-
+    raise "RNG was never initialized" unless @initialized
+    twist if @index == n
     y = @x[@index]
     y ^= ((y >> u) & d)
     y ^= ((y << s) & b)
@@ -36,6 +32,8 @@ class Chal21
 
     y & 0xFFFF_FFFF
   end
+
+  private
 
   def twist
     (0...n).each do |i|
