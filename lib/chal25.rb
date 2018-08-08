@@ -6,9 +6,8 @@ class Chal25
       @nonce = rand(2**64)
       @key = AES.random_key
       @size = size
-      @disk = @size.times.map{ rand(256) }.pack("C*")
+      @disk = Random::DEFAULT.bytes(@size)
     end
-
 
     def write(ofs, data)
       before_bytes = ofs % 16

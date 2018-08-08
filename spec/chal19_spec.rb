@@ -4,7 +4,7 @@ describe Chal19 do
   let(:samples) { samples_path.readlines.map{|x| Base64.decode64(x) }}
   let(:ctr) { Chal18.new }
   let(:nonce) { 0 }
-  let(:key) { 16.times.map{ rand(256) }.pack("C*") }
+  let(:key) { Random::DEFAULT.bytes(16) }
   let(:encrypted) { samples.map{|s| ctr.encode(s, key, nonce) } }
 
   # This is a result of iterative human guessing

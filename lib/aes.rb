@@ -1,7 +1,7 @@
 module AES
   class << self
     def random_key
-      (0..15).map{ rand(256) }.pack("C*")
+      Random::DEFAULT.bytes(16)
     end
 
     def encrypt_block(block, key)

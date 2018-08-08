@@ -1,6 +1,6 @@
 class Chal11
   def random_padding
-    rand(5..10).times.map{ rand(256) }.pack("C*")
+    Random::DEFAULT.bytes(rand(5..10))
   end
 
   def cbc_box

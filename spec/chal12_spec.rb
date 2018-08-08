@@ -8,7 +8,7 @@ describe Chal12 do
         proc{|str|
           unpadded_size = str.size + extra_size
           padded_size = (unpadded_size + (n-1)) / n * n
-          padded_size.times.map{ rand(256) }.pack("C*")
+          Random::DEFAULT.bytes(padded_size)
         }
       }
     end
@@ -27,7 +27,7 @@ describe Chal12 do
       proc{|str|
         unpadded_size = str.size + extra_size
         padded_size = (unpadded_size + (n-1)) / n * n
-        padded_size.times.map{ rand(256) }.pack("C*")
+        Random::DEFAULT.bytes(padded_size)
       }
     end
 

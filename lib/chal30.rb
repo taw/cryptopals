@@ -1,7 +1,7 @@
 class Chal30
   class Box
     def initialize(secret_size)
-      @secret = secret_size.times.map{ rand(256) }.pack("C*")
+      @secret = Random::DEFAULT.bytes(secret_size)
     end
 
     # Secure method, hack doesn't get access to the box

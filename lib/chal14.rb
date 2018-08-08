@@ -11,7 +11,7 @@ class Chal14
     key = AES.random_key
     proc do |txt|
       # If prefix is different every time, and different length, then it's harder
-      random_prefix = rand(10..100).times.map{ rand(256) }.pack("C*")
+      random_prefix = Random::DEFAULT.bytes(rand(10..100))
       AES.encrypt_ecb(random_prefix + txt + Base64.decode64(unknown_string), key)
     end
   end
