@@ -17,4 +17,15 @@ class String
     raise "Incompatible sizes" unless s1.size == s2.size
     s1.zip(s2).map{|u,v| u^v}.pack("C*")
   end
+
+  def byteslices(slice_size)
+    result = []
+    msg = b
+    ofs = 0
+    while ofs < msg.size
+      result << msg[ofs, slice_size]
+      ofs += slice_size
+    end
+    result
+  end
 end
