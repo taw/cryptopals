@@ -54,5 +54,14 @@ class Chal49
 
    def self.cbc_mac(msg, key, iv)
       AES.encrypt_cbc(msg, key, iv)[-16..-1]
-    end
+   end
+
+   def self.hack(request, account1, account2)
+      account1 = account1.to_s
+      account2 = account2.to_s
+      raise "Attack only works if both accounts have same length" unless account1.size == account2.size
+      mask = "from=#{account1}".xor("from=#{account2}")
+      raise "Attack only works on first block" if mask.size > 16
+      request.xor(mask + "\x00".b * (request.size - 32 - mask.size) + mask + "\x00".b * (32-mask.size))
+   end
  end

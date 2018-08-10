@@ -20,8 +20,14 @@ describe Chal49 do
     end
   end
 
+  # Target - 100
+  # Attacker - 300/400s
   describe "Requests can be faked" do
-    pending
+    let(:req) { client3.generate_transfer_request(300, 400, 1_000_000) }
+    let(:hacked) { Chal49.hack(req, 100, 300) }
+    it do
+      expect(server.call(hacked)).to eq(["OK", 100, 400, 1_000_000])
+    end
   end
 
   # PART 2
