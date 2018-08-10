@@ -1,14 +1,13 @@
 class Chal49
   class Server
-    def initialize(keys)
-      @keys = keys
+    def initialize(key)
+      @key = key
     end
 
     def call(request)
       message, iv, mac = parse_request(request)
       from_id, to_id, amount = parse_message(message)
-      key = key_for(from_id)
-      raise "Invalid MAC" unless Chal49.cbc_mac(message, key, iv) == mac
+      raise "Invalid MAC" unless cbc_mac(message, iv) == mac
       # Everythig is good, so execute!
       ["OK", from_id, to_id, amount]
     end
@@ -32,15 +31,20 @@ class Chal49
       message = request[0..-33]
       [message, iv, mac]
     end
+
+    def cbc_mac(msg, iv)
+      Chal49.cbc_mac(msg, @key, iv)
+    end
   end
 
-  class Client
+  class WebClient
     def initialize(account, key)
       @account = account
       @key = key
     end
 
     def generate_transfer_request(from_id, to_id, amount)
+      raise "Can only sign messages from own account" unless from_id == @account
       msg = "from=#{from_id}&to=#{to_id.to_i}&amount=#{amount.to_i}"
       iv = Random::DEFAULT.bytes(16)
       mac = Chal49.cbc_mac(msg, @key, iv)
@@ -48,7 +52,7 @@ class Chal49
     end
   end
 
-  def self.cbc_mac(msg, key, iv)
-    AES.encrypt_cbc(msg, key, iv)[-16..-1]
-  end
-end
+   def self.cbc_mac(msg, key, iv)
+      AES.encrypt_cbc(msg, key, iv)[-16..-1]
+    end
+ end
