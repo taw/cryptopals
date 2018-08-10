@@ -51,7 +51,13 @@ describe Chal49 do
     end
 
     describe "Requests can be faked" do
-      pending
+      let(:legit_client) { Chal49::WebClient2.new(100, key) }
+      let(:intercepted_req) { legit_client.generate_transfer_request(100, 200, 1000, 250, 2000) }
+      let(:attacker_client) { Chal49::WebClient2.new(300, key) }
+      let(:hacked_request) { Chal49.hack2(intercepted_req, attacker_client, 400, 1_000_000) }
+      it do
+        expect(server.call(hacked_request)[-2,2]).to eq [400, 1_000_000]
+      end
     end
   end
 end

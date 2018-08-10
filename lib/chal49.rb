@@ -88,6 +88,7 @@ class Chal49
   end
 
   class WebClient2
+    attr_reader :account
     def initialize(account, key)
       @account = account
       @key = key
@@ -102,6 +103,16 @@ class Chal49
       mac = Chal49.cbc_mac(msg, @key, "\x00".b*16)
       (msg + mac)
     end
+  end
+
+  def self.hack2(intercepted_request, attacker_client, destination_account, sum)
+    mac1 = intercepted_request[-16..-1]
+    msg1 = AES.pad(intercepted_request[0..-17])
+    attacker_account = attacker_client.account
+    req2 = attacker_client.generate_transfer_request(attacker_account, destination_account, 1, destination_account, sum)
+    mac2 = req2[-16..-1]
+    msg2 = req2[0..-17]
+    msg1 + msg2.xor(mac1 + "\x00".b * (msg2.size-16)) + mac2
   end
 
   def self.cbc_mac(msg, key, iv)

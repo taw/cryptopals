@@ -38,7 +38,12 @@ module AES
       decrypt(msg, mode: "AES-128-CTR", key: key, iv: iv)
     end
 
-    private def encrypt(msg, mode:, key:, iv: nil, padding: true)
+    def pad(msg)
+      n = (-msg.size % 16)
+      msg + [n].pack("C") * n
+    end
+
+    def encrypt(msg, mode:, key:, iv: nil, padding: true)
       crypt = OpenSSL::Cipher.new(mode)
       crypt.encrypt
       crypt.key = key
@@ -47,7 +52,7 @@ module AES
       crypt.update(msg) + crypt.final
     end
 
-    private def decrypt(msg, mode:, key:, iv: nil, padding: true)
+    def decrypt(msg, mode:, key:, iv: nil, padding: true)
       crypt = OpenSSL::Cipher.new(mode)
       crypt.decrypt
       crypt.key = key
