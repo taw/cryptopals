@@ -20,27 +20,16 @@ class Chal52
       end
     end
 
-    def extend_block_collision(state, *collisions)
+    def extend_block_collision(state, collisions)
       a, b, new_state = find_block_collision(state)
-      [new_state, *collisions, [a, b]]
-    end
-  end
-
-  # 16bit
-  class F < IteratedHash
-    def initial_state
-      "AB"
-    end
-
-    def reduce(state, chunk)
-      AES.encrypt_block(chunk, state + "\x00"*14)[0, 2]
+      [new_state, collisions.flat_map{|msg| [msg+a, msg+b]}]
     end
   end
 
   # 24bit
-  class G < IteratedHash
+  class F < IteratedHash
     def initial_state
-      "012"
+      "ABC"
     end
 
     def reduce(state, chunk)
@@ -48,10 +37,47 @@ class Chal52
     end
   end
 
-  # 40bit
+  # 32bit
+  class G < IteratedHash
+    def initial_state
+      "0124"
+    end
+
+    def reduce(state, chunk)
+      AES.encrypt_block(chunk, state + "\x00"*12)[0, 4]
+    end
+  end
+
+  # 56bit
   class FG
+    def initialize
+      @f = F.new
+      @g = G.new
+    end
+
     def hexdigest(msg)
-      F.new.hexdigest(msg) + G.new.hexdigest(msg)
+      @f.hexdigest(msg) + @g.hexdigest(msg)
+    end
+
+    def find_collision
+      state = @f.initial_state
+      f_collisions = [""]
+      # Too unlikely to get double collission in fewer blocks so just fast forward
+      16.times do
+        state, f_collisions = @f.extend_block_collision(state, f_collisions)
+      end
+      while true
+        hashes = {}
+        f_collisions.each do |msg|
+          h = @g.hexdigest(msg)
+          if hashes[h]
+            return [hashes[h], msg]
+          end
+          hashes[h] = msg
+        end
+        # Wasn't enough? Try some more
+        state, f_collisions = @f.extend_block_collision(state, f_collisions)
+      end
     end
   end
 end

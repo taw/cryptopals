@@ -5,9 +5,9 @@ describe Chal52 do
 
   describe "Hashes" do
     it do
-      expect(f.hexdigest("Hello, world!")).to eq("53fe")
-      expect(g.hexdigest("Hello, world!")).to eq("111507")
-      expect(fg.hexdigest("Hello, world!")).to eq("53fe" + "111507")
+      expect(f.hexdigest("Hello, world!")).to eq("0a30eb")
+      expect(g.hexdigest("Hello, world!")).to eq("82f869da")
+      expect(fg.hexdigest("Hello, world!")).to eq("0a30eb" + "82f869da")
     end
   end
 
@@ -21,19 +21,23 @@ describe Chal52 do
 
   describe "#extend_block_collision" do
     it do
-      state_and_collisions = [f.initial_state]
+      state = f.initial_state
+      collisions = [""]
       4.times do
-        state_and_collisions = f.extend_block_collision(*state_and_collisions)
+        state, collisions = f.extend_block_collision(state, collisions)
       end
-      all_msgs = state_and_collisions[1..-1].reduce([""]){|msgs,(a,b)| msgs.flat_map{|msg| [msg+a, msg+b] }  }
-      hashes = all_msgs.map{|msg| f.hexdigest(msg) }
-      expect(all_msgs.size).to eq(16)
-      expect(all_msgs.uniq.size).to eq(16)
+      hashes = collisions.map{|msg| f.hexdigest(msg) }
+      expect(collisions.size).to eq(16)
+      expect(collisions.uniq.size).to eq(16)
       expect(hashes.uniq.size).to eq(1)
     end
   end
 
-  describe "hack" do
-    pending
+  describe "FG#find_collision" do
+    it do
+      m1, m2 = fg.find_collision
+      expect(m1).to_not eq(m2)
+      expect(fg.hexdigest(m1)).to eq(fg.hexdigest(m2))
+    end
   end
 end
