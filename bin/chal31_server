@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+require "rack"
+require_relative "../lib/cryptopals"
+
+Rack::Server.start(
+  app: Chal31::Server.new,
+  Port: 9292
+)
