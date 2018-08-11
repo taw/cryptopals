@@ -7,7 +7,6 @@ class Chal52
       message.b + "\x80".b + "\x00".b * extra_zeroes + [message.size].pack("V")
     end
 
-    # Just for debugging
     def unpadded_hexdigest(msg)
       msg.byteslices(16).reduce(initial_state) do |state, chunk|
         reduce(state, chunk)
