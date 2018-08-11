@@ -45,4 +45,10 @@ class Integer
     raise "Can't integer root negative number" if n < 0
     (0..self).bsearch{|i| self - i**n }
   end
+
+  def self.chinese_remainder(remainders, mods)
+    max = mods.reduce(:*)
+    series = remainders.zip(mods).map{ |r,m| (r * max * (max/m).invmod(m) / m) }
+    series.reduce(:+) % max
+  end
 end
