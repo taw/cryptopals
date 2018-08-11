@@ -7,10 +7,15 @@ class Chal52
       message.b + "\x80".b + "\x00".b * extra_zeroes + [message.size].pack("V")
     end
 
-    def hexdigest(msg)
-      pad_message(msg).byteslices(16).reduce(initial_state) do |state, chunk|
+    # Just for debugging
+    def unpadded_hexdigest(msg)
+      msg.byteslices(16).reduce(initial_state) do |state, chunk|
         reduce(state, chunk)
       end.to_hex
+    end
+
+    def hexdigest(msg)
+      unpadded_hexdigest pad_message(msg)
     end
 
     def find_block_collision(state)
