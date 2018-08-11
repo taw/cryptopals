@@ -1,7 +1,14 @@
 class Chal52
   class IteratedHash
+    # SHA1 style padding except with 128bit blocks and 32bit size in bytes
+    # (it doesn't make it easier than full SHA1 padding would)
+    def pad_message(message)
+      extra_zeroes = -(message.size + 5) % 16
+      message.b + "\x80".b + "\x00".b * extra_zeroes + [message.size].pack("V")
+    end
+
     def hexdigest(msg)
-      AES.pad(msg).byteslices(16).reduce(initial_state) do |state, chunk|
+      pad_message(msg).byteslices(16).reduce(initial_state) do |state, chunk|
         reduce(state, chunk)
       end.to_hex
     end

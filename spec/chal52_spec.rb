@@ -5,9 +5,9 @@ describe Chal52 do
 
   describe "Hashes" do
     it do
-      expect(f.hexdigest("Hello, world!")).to eq("0a30eb")
-      expect(g.hexdigest("Hello, world!")).to eq("82f869da")
-      expect(fg.hexdigest("Hello, world!")).to eq("0a30eb" + "82f869da")
+      expect(f.hexdigest("Hello, world!")).to eq("405c55")
+      expect(g.hexdigest("Hello, world!")).to eq("a37bc6f1")
+      expect(fg.hexdigest("Hello, world!")).to eq("405c55" + "a37bc6f1")
     end
   end
 
