@@ -1,4 +1,4 @@
-class Chal31
+class Chal32
   class Server
     def initialize
       @data = "All your base are belong to us\n"
@@ -20,7 +20,7 @@ class Chal31
     def insecure_compare(a, b)
       i = 0
       while true
-        sleep 0.02
+        sleep 0.001
         return false if a[i] != b[i]
         return true if a[i] == nil and b[i] == nil
         i += 1
@@ -43,36 +43,40 @@ class Chal31
     end
 
     def break_character(known_prefix)
+      fails = 0
       while true
-        responses = (0..15).map do |i|
-          prefix = known_prefix + i.to_s(16)
-          response = request(prefix)
-          # It's OK, so don't bother with timing stuff
-          return prefix if response[1]
-          [*response, prefix]
+        responses = 16.times.map{ [] }
+        # Go around 5 times to avoid clustering
+        5.times do
+          (0..15).map do |i|
+           prefix = known_prefix + i.to_s(16)
+            response = request(prefix)
+            # It's OK, so don't bother with timing stuff
+            return prefix if response[1]
+            responses[i] << [*response, prefix]
+          end
         end
+        responses = responses.map(&:min)
+
         candidate = responses.max.last
         next_slowest = (responses - [responses.max]).max.first
         # Confirm
-        response = request(candidate)
+        response = 5.times.map{ request(candidate) }.min
         if response[0] > next_slowest
           return candidate
         else
           warn "Confirmation failed on #{known_prefix}, retrying"
+          fails += 1
+          # binding.pry if fails == 10
         end
       end
     end
-
-    # Req time is, 32 char MAC (MD5):
-    # * request - kt or (k+1)t
-    # * character - (16k+1)t
-    # * mac - 16 * 8480 * t = almost 2h
 
     def hack
       prefix = ""
       16.times do
         prefix = break_character(prefix)
-        # warn "GOT: #{prefix}"
+        warn "GOT: #{prefix}"
       end
       response = request(prefix)
       raise "Hack failed" unless response[1]
