@@ -59,6 +59,31 @@ class ECC
     result
   end
 
+  # infinity is technically a point too, but don't bother
+  def random_point
+    while true
+      x = rand(0...@p)
+      yy = (x**3 + @a*x + @b) % @p
+      y = yy.sqrtmod(@p)
+      if y
+        if rand(2) == 0
+          return [x, y]
+        else
+          return [x, @p-y]
+        end
+      end
+    end
+  end
+
+  def random_point_of_order(group_order, requested_point_order)
+    raise "Invalid request" if group_order % requested_point_order != 0
+    m = group_order / requested_point_order
+    while true
+      point = multiply(random_point, m)
+      return point unless point == :infinity
+    end
+  end
+
   # Super slow
   def points
     result = [:infinity]
