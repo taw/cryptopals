@@ -20,7 +20,8 @@ class Chal32
     def insecure_compare(a, b)
       i = 0
       while true
-        sleep 0.001
+        # sleep 0.001 # 1ms - this usually works locally but not on CI
+        sleep 0.005 # 5ms
         return false if a[i] != b[i]
         return true if a[i] == nil and b[i] == nil
         i += 1

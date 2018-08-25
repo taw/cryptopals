@@ -37,7 +37,6 @@ class Chal59
     end
 
     def secret
-      # HACK HACK HACK HACK!!!
       mods = []
       residues = []
       @attack_data.each do |group, order, factor|
