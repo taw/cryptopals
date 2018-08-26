@@ -31,5 +31,13 @@ class Chal60
       end
       (u2 * w2.powmod(@p-2, @p)) % @p
     end
+
+    def calculate_v(u)
+      bvv = (u*u*u + @a*u*u + u) % @p
+      vv = bvv * @b.invmod(@p)
+      v = vv.sqrtmod(@p)
+      return unless v
+      [v, @p-v].sort
+    end
   end
 end

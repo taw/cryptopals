@@ -15,7 +15,7 @@ describe Chal60 do
     expect( montgomery_curve.ladder(u, order+1) ).to eq(u)
   end
 
-   it "maps point correctly" do
+  it "maps point correctly between two curve formatss" do
     [0, 1, 123456, order-2, order-1, order].each do |k|
       gkm = montgomery_curve.ladder(u, k)
       gkw = weierstrass_curve.multiply(g, k)
@@ -23,8 +23,16 @@ describe Chal60 do
         expect(gkm).to eq(0)
       else
         expect(gkm).to eq(gkw[0]-178)
+        # v or -v
+        expect(montgomery_curve.calculate_v(gkm)).to include(gkw[1])
       end
     end
+  end
+
+  it "can still be attacked by invalid numbers" do
+    evil_u = 76600469441198017145391791613091732004
+    expect(montgomery_curve.ladder(evil_u, 11)).to eq(0)
+    expect(montgomery_curve.calculate_v(evil_u)).to eq(nil)
   end
 
   # All the hacking
