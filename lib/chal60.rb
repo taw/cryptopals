@@ -5,6 +5,8 @@ class Chal60
       @p = p
       @a = a
       @b = b
+      @binv = @b.invmod(@p)
+      @third = 3.invmod(@p)
       @p_bitlen = @p.to_s(2).size
     end
 
@@ -34,10 +36,36 @@ class Chal60
 
     def calculate_v(u)
       bvv = (u*u*u + @a*u*u + u) % @p
-      vv = bvv * @b.invmod(@p)
+      vv = (bvv * @binv) % @p
       v = vv.sqrtmod(@p)
       return unless v
       [v, @p-v].sort
+    end
+
+    def valid?(u, v)
+      bvv = (u*u*u + @a*u*u + u) % @p
+      vv = (bvv * @binv) % @p
+      0 == (v*v - vv) % @p
+    end
+
+    def associated_weierstrass_curve
+      a = ((3-@a*@a) * (3*@b*@b).invmod(@p)) % @p
+      b = ((2*@a*@a*@a - 9*@a) * (27*@b*@b*@b).invmod(@p)) % @p
+      ECC.new(@p, a, b)
+    end
+
+    # This seems backwards from what I've read
+    # Also doesn't handle point at infinity
+    def to_weierstrass(u, v)
+      x = (@b*u + @a*@third) % @p
+      y = (v * @b) % @p
+      [x, y]
+    end
+
+    def from_weierstrass(x, y)
+      u = ((x - @a * @third) * @binv) % @p
+      v = (y * @binv) % @p
+      [u, v]
     end
   end
 end

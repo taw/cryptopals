@@ -24,7 +24,7 @@ desc "Print done status"
 task "status" do
   done = (1..64).select{|i|
     path=Pathname("#{__dir__}/spec/chal#{i}_spec.rb")
-    path.exist? and path.read =~ /expect/
+    path.exist? and path.read =~ /expect/ and path.read !~ /pending/
   }.to_set
 
   (1..64).each_slice(8).each do |slice|

@@ -95,4 +95,8 @@ class ECC
     end
     result
   end
+
+  def ==(other)
+    other.is_a?(ECC) and self.p == other.p and self.a == other.a and self.b == other.b
+  end
 end

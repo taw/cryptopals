@@ -16,7 +16,7 @@ describe Chal60 do
   end
 
   it "maps point correctly between two curve formatss" do
-    [0, 1, 123456, order-2, order-1, order].each do |k|
+    [0, 1, 2, 1000, 123456, order-2, order-1, order].each do |k|
       gkm = montgomery_curve.ladder(u, k)
       gkw = weierstrass_curve.multiply(g, k)
       if gkw == :infinity
@@ -33,6 +33,21 @@ describe Chal60 do
     evil_u = 76600469441198017145391791613091732004
     expect(montgomery_curve.ladder(evil_u, 11)).to eq(0)
     expect(montgomery_curve.calculate_v(evil_u)).to eq(nil)
+  end
+
+  it "associated_weierstrass_curve" do
+    expect(montgomery_curve.associated_weierstrass_curve).to eq(weierstrass_curve)
+  end
+
+  it "from and to weierstrass form" do
+    10.times do
+      x, y = weierstrass_curve.random_point
+      expect(weierstrass_curve.valid?([x, y])).to eq true
+      u, v = montgomery_curve.from_weierstrass(x, y)
+      expect(montgomery_curve.valid?(u, v)).to eq true
+      x1, y1 = montgomery_curve.to_weierstrass(u, v)
+      expect([x1,y1]).to eq([x,y])
+    end
   end
 
   # All the hacking
