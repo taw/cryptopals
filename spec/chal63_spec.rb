@@ -17,8 +17,8 @@ describe Chal63 do
   let(:tag1) { msg1[2] }
   let(:tag2) { msg2[2] }
 
-  let(:h) { GCM.calculate_h(key) }
-  let(:mask) { GCM.iv_block(key, iv) }
+  let(:h) { GCMField.new GCM.calculate_h(key) }
+  let(:mask) { GCMField.new GCM.iv_block(key, iv) }
 
   # It can only be verified by recipient, so not part of the hack, just sanity check
   it "is valid" do
@@ -31,8 +31,8 @@ describe Chal63 do
     expect(dpt2).to eq(pt2)
   end
 
-  it "GCM.pow" do
-    expect(GCM.pow(h, 3)).to eq( GCM.mul(GCM.mul(h, h), h) )
+  it "GCMField#**" do
+    expect(h**3).to eq(h*h*h)
   end
 
   describe "msg_blocks" do
@@ -40,26 +40,26 @@ describe Chal63 do
       aad, ct, tag = GCM.encrypt(key, iv, "", "x")
       blocks = chal.msg_blocks(aad, ct)
       expect(blocks.size).to eq(2)
-      atag = GCM.mul(GCM.mul(h, h), blocks[1]) ^  GCM.mul(h, blocks[0]) ^ mask
-      expect(atag).to eq(tag)
+      atag = h*h*blocks[1] + h*blocks[0] + mask
+      expect(atag.to_i).to eq(tag)
     end
 
     it "msg1" do
       blocks = chal.msg_blocks(aad1, ct1)
-      atag1 = chal.eval_poly(blocks, h) ^ mask
-      expect(atag1).to eq(tag1)
+      atag1 = chal.eval_poly(blocks, h) + mask
+      expect(atag1.to_i).to eq(tag1)
     end
 
     it "msg2" do
       blocks = chal.msg_blocks(aad2, ct2)
-      atag2 = chal.eval_poly(blocks, h) ^ mask
-      expect(atag2).to eq(tag2)
+      atag2 = chal.eval_poly(blocks, h) + mask
+      expect(atag2.to_i).to eq(tag2)
     end
   end
 
   it "extract_poly" do
     poly = chal.extract_poly(msg1, msg2)
-    expect(chal.eval_poly(poly, h)).to eq(tag1 ^ tag2)
+    expect(chal.eval_poly(poly, h).to_i).to eq(tag1 ^ tag2)
   end
 
   # Actual hack

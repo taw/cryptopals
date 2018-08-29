@@ -1,5 +1,6 @@
 class Chal63
   def extract_poly(msg1, msg2)
+    zero = GCMField.zero
     aad1, ct1, tag1 = msg1
     aad2, ct2, tag2 = msg2
 
@@ -9,7 +10,9 @@ class Chal63
     dtag = tag1 ^ tag2
 
     max_size = [m1.size, m2.size].max
-    max_size.times.map{|i| m1.fetch(i,0) ^ m2.fetch(i,0) }
+    max_size.times.map{|i|
+      m1.fetch(i, zero) + m2.fetch(i, zero)
+    }
   end
 
   def msg_blocks(aad, ct)
@@ -24,11 +27,13 @@ class Chal63
     end
 
     blocks << GCM.final_block(aad, ct)
-    blocks.reverse
+    blocks.reverse.map{|i| GCMField.new(i) }
   end
 
   # Doing it stupid way here
   def eval_poly(poly, h)
-    poly.map.with_index{|b,i| GCM.mul(GCM.pow(h, i+1), b) }.inject{|a,b| a^b}
+    poly.map.with_index{|b,i|
+      h ** (i+1) * b
+    }.inject{|a,b| a+b}
   end
 end

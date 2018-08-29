@@ -1,15 +1,5 @@
 module GCM
   class << self
-    # Not used by algorithm itself, super slow
-    def pow(g, k)
-      # This is somehow identity because everything is backwards
-      u = (1<<127)
-      k.times{
-        u = mul(u, g)
-      }
-      u
-    end
-
     # no reflection version
     # Such a weird hack
     def mul(a, b)
