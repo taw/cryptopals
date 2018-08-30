@@ -62,6 +62,14 @@ describe Chal63 do
     expect(poly.eval(h).to_i).to eq(tag1 ^ tag2)
   end
 
+  it "GCMField#to_monic" do
+    poly = chal.extract_poly(msg1, msg2)
+    leading_coefficient = poly.a.last
+    monic_poly = poly.to_monic
+    expect(monic_poly.a.last).to be_one
+    expect((monic_poly.eval(h) * leading_coefficient).to_i).to eq(tag1 ^ tag2)
+  end
+
   # Actual hack
   pending
 end

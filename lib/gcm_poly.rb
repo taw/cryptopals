@@ -24,6 +24,12 @@ class GCMPoly
     self+other
   end
 
+  def to_monic
+    return self if @a.empty?
+    factor = @a.last.inverse
+    GCMPoly.new @a.map{|c| c * factor }
+  end
+
   # Doing it stupid way here
   def eval(h)
     return GCMField.zero if @a.empty?
