@@ -39,8 +39,8 @@ describe Chal63 do
     it "trivial message" do
       aad, ct, tag = GCM.encrypt(key, iv, "", "x")
       blocks = chal.msg_blocks(aad, ct).a
-      expect(blocks.size).to eq(2)
-      atag = h*h*blocks[1] + h*blocks[0] + mask
+      expect(blocks.size).to eq(3)
+      atag = h*h*blocks[2] + h*blocks[1] + blocks[0] + mask
       expect(atag.to_i).to eq(tag)
     end
 
@@ -59,15 +59,14 @@ describe Chal63 do
 
   it "extract_poly" do
     poly = chal.extract_poly(msg1, msg2)
-    expect(poly.eval(h).to_i).to eq(tag1 ^ tag2)
+    expect(poly.eval(h)).to be_zero
   end
 
   it "GCMField#to_monic" do
     poly = chal.extract_poly(msg1, msg2)
-    leading_coefficient = poly.a.last
     monic_poly = poly.to_monic
     expect(monic_poly.a.last).to be_one
-    expect((monic_poly.eval(h) * leading_coefficient).to_i).to eq(tag1 ^ tag2)
+    expect(monic_poly.eval(h)).to be_zero
   end
 
   # Actual hack

@@ -11,6 +11,7 @@ class GCMPoly
   end
 
   def +(other)
+    return self + GCMPoly.new([other]) if other.is_a?(GCMField)
     raise unless other.is_a?(GCMPoly)
     m1 = a
     m2 = other.a
@@ -30,11 +31,14 @@ class GCMPoly
     GCMPoly.new @a.map{|c| c * factor }
   end
 
-  # Doing it stupid way here
   def eval(h)
     return GCMField.zero if @a.empty?
-    @a.map.with_index{|b,i|
-      h ** (i+1) * b
-    }.inject{|a,b| a+b}
+    sum = GCMField.zero
+    hi = GCMField.one
+    @a.each do |b|
+      sum += hi * b
+      hi *= h
+    end
+    sum
   end
 end

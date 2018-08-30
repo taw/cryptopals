@@ -6,8 +6,8 @@ class Chal63
 
     m1 = msg_blocks(aad1, ct1)
     m2 = msg_blocks(aad2, ct2)
-    # dtag = tag1 ^ tag2
-    m1 + m2
+    dtag = GCMField.new(tag1) + GCMField.new(tag2)
+    m1 + m2 + dtag
   end
 
   def msg_blocks(aad, ct)
@@ -22,6 +22,6 @@ class Chal63
     end
 
     blocks << GCM.final_block(aad, ct)
-    GCMPoly.new blocks.reverse.map{|i| GCMField.new(i) }
+    GCMPoly.new [GCMField.zero, *blocks.reverse.map{|i| GCMField.new(i) }]
   end
 end
