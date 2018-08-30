@@ -89,6 +89,10 @@ class GCMField
     "GCMField<#{to_s}>"
   end
 
+  def zero?
+    @value == 0
+  end
+
   class << self
     def zero
       GCMField.new(0)
