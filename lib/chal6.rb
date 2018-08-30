@@ -1,6 +1,6 @@
 class Chal6
   def hamming_distance(str1, str2)
-    str1.xor(str2).unpack("C*").map(&:count_bits).sum
+    str1.xor(str2).bytes.map(&:count_bits).sum
   end
 
   def repeated_edit_distance(str, n)

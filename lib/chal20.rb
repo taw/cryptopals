@@ -10,7 +10,7 @@ class Chal20
     end
 
     decrypted = encrypted.map{|slice|
-      slice.unpack("C*").map.with_index{|c,i| c ^ keystream[i]}.pack("C*")
+      slice.bytes.map.with_index{|c,i| c ^ keystream[i]}.pack("C*")
     }
 
     decrypted

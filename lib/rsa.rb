@@ -44,7 +44,7 @@ module RSA
       end
       decoded = "000" + signature.powmod(e, n).to_s(16)
       return false unless decoded.size.even?
-      decoded = decoded.from_hex.unpack("C*")
+      decoded = decoded.from_hex.bytes
       return false unless decoded.shift == 0
       return false unless decoded.shift == 1
       decoded.shift while decoded[0] == 255

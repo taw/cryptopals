@@ -16,9 +16,9 @@ class Chal30
 
   class MD4
     def pad_message(message)
-      byte_string = message.unpack("C*") + [128]
+      byte_string = message.bytes + [128]
       extra_zeroes = -(message.size + 9) % 64
-      byte_string += [0] * extra_zeroes + [message.size*8].pack("Q<").unpack("C*")
+      byte_string += [0] * extra_zeroes + [message.size*8].pack("Q<").bytes
       byte_string.each_slice(4).map{ |slice| slice.reverse.inject{ |a,b| (a<<8) + b } }
     end
 

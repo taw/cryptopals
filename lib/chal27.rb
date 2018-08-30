@@ -14,7 +14,7 @@ class Chal27
 
     def access(msg)
       plaintext = AES.decrypt_cbc(msg, @key, @key)
-      if plaintext.unpack("C*").any?{|c| c >= 128}
+      if plaintext.bytes.any?{|c| c >= 128}
         [:bad_msg, plaintext]
       else
         [:ok]

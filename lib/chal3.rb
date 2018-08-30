@@ -4,7 +4,7 @@ class Chal3
   end
 
   def xor(str, key)
-    str.chars.map{|c| (c.ord ^ key).chr}.join
+    str.bytes.map{|c| (c ^ key).chr}.join
   end
 
   def call

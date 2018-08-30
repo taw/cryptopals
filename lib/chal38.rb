@@ -113,7 +113,7 @@ class Chal38
     end
 
     def words
-      Pathname(dict_path).readlines.map(&:chomp)
+      Pathname(dict_path).readlines.map(&:chomp).map(&:downcase).sort.uniq
     end
   end
 end
