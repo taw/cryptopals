@@ -67,6 +67,10 @@ class GCMField
     self ** ((1 << 128) - 2)
   end
 
+  def sqrt
+    self ** (1 << 127)
+  end
+
   def /(other)
     self * other.inverse
   end

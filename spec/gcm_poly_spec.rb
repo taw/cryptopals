@@ -88,4 +88,53 @@ describe GCMPoly do
     v = GCMPoly[a,one] * GCMPoly[b,one] * GCMPoly[d,one] * GCMPoly[e,one]
     expect(u.gcd(v)).to eq GCMPoly[a,one] * GCMPoly[b,one]
   end
+
+  it "formal_derivative" do
+    u = GCMPoly[a, b, c, d, e]
+    expect(u.formal_derivative).to eq(
+      GCMPoly[b, c+c, d+d+d, e+e+e+e]
+    )
+  end
+
+  it "sqrt" do
+    u = GCMPoly[a]
+    expect((u**2).sqrt).to eq(u)
+    v = GCMPoly[a, b]
+    expect((v**2).sqrt).to eq(v)
+    w = GCMPoly[a, b, c]
+    expect((w**2).sqrt).to eq(w)
+  end
+
+  describe "square_free_factorization" do
+    let(:fa) { GCMPoly[a,one] }
+    let(:fb) { GCMPoly[b,one] }
+    let(:fc) { GCMPoly[c,one] }
+    let(:fd) { GCMPoly[d,one] }
+
+    it "square_free_factorization" do
+      u = fa*fa*b
+      sff = u.square_free_factorization
+      expect(sff.map(&:degree).sum).to eq u.degree
+      expect(sff).to match_array([fa, fa, GCMPoly[b]])
+    end
+
+    it do
+      u = fa * fa * fb * fc * d
+      sff = u.square_free_factorization
+      expect(sff.map(&:degree).sum).to eq u.degree
+      expect(sff).to match_array([fa, fa, fb*fc, GCMPoly[d]])
+    end
+
+    it "square_free_factorization" do
+      u = fa**4 * fb**3 * fc**2 * fd * e
+      sff = u.square_free_factorization
+      expect(sff.map(&:degree).sum).to eq u.degree
+      expect(sff).to match_array([
+        fa, fa, fa, fa,
+        fb, fb, fb,
+        fc, fc,
+        fd,
+        GCMPoly[e]])
+    end
+  end
 end

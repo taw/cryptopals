@@ -58,11 +58,12 @@ class GCMPoly
   end
 
   def gcd(other)
+    raise ZeroDivisionError, "Can't gcd with zero" if zero?
+    raise ZeroDivisionError, "Can't gcd with zero" if other.zero?
     a = self.to_monic
     b = other.to_monic
     a, b = b, a if a.degree < b.degree
     q, r = a.divmod(b)
-
     if r.zero?
       b
     else
@@ -112,6 +113,91 @@ class GCMPoly
 
   def zero?
     @a.empty?
+  end
+
+  def one?
+    @a.size == 1 and @a[0].one?
+  end
+
+  def sqrt
+    result = []
+    @a.each_with_index do |a, i|
+      if i.even?
+        result << a.sqrt
+      else
+        raise "No sqrt" unless a.zero?
+      end
+    end
+    GCMPoly.new result
+  end
+
+  def square_free_factorization
+    f = self
+    result = []
+    unless f.monic?
+      result << GCMPoly[@a.last]
+      f = f.to_monic
+    end
+
+    df = f.formal_derivative
+
+    if df.zero?
+      # This branch is unclear
+      c = f
+    else
+      c = f.gcd(df)
+      w = f/c
+      i = 1
+
+      # Step 1: Identify all factors in w
+      until w.one?
+        y = w.gcd(c)
+        fac = w/y
+        unless fac.one?
+          result.push *([fac] * i)
+        end
+        w = y
+        c = c/y
+        i += 1
+      end
+    end
+
+    # c is now the product (with multiplicity) of the remaining factors of f
+    # Step 2: Identify all remaining factors using recursion
+    # Note that these are the factors of f that have multiplicity divisible by p
+    unless c.one?
+      cs = c.sqrt
+      result.push *(cs.square_free_factorization * 2)
+    end
+
+    # I don't think it's possible to get multiple degree 0 polynomials this way
+    result
+  end
+
+  # Underlying field has characteristic 2
+  def formal_derivative
+    GCMPoly.new (0...@a.size-1).map { |i| i.odd? ? GCMField.zero : @a[i+1] }
+  end
+
+  def **(k)
+    raise unless k.is_a?(Integer)
+    if k < 0
+      return inverse ** (-k)
+    end
+    result = GCMPoly[GCMField.one]
+    n = self
+    while k > 0
+      if k.odd?
+        result *= n
+      end
+      k >>= 1
+      n *= n
+    end
+    result
+  end
+
+  def inspect
+    "GCMPoly<#{@a.map{|u| "%032x" % u.value}.join(", ")}>"
   end
 
   class << self
