@@ -1,4 +1,5 @@
 # Polynomial over GCMField
+# Least significant coefficient first
 class GCMPoly
   attr_reader :a
   def initialize(a)
@@ -8,6 +9,56 @@ class GCMPoly
 
   def degree
     @a.size - 1
+  end
+
+  def <<(k)
+    raise unless k.is_a?(Integer) and k >= 0
+    GCMPoly.new [GCMField.zero] * k + @a
+  end
+
+  def >>(k)
+    raise unless k.is_a?(Integer) and k >= 0
+    GCMPoly.new @a.drop(k)
+  end
+
+  def *(other)
+    if other.is_a?(GCMField)
+      return GCMPoly.new a.map{|b| b*other}
+    end
+    sum = GCMPoly.new []
+    @a.each do |a|
+      sum += other * a
+      other <<= 1
+    end
+    sum
+  end
+
+  def divmod(other)
+    raise ZeroDivisionError, "Can't divide by zero" if other.degree == -1
+    q = GCMPoly.new([])
+    r = self
+    b = other
+
+    while r.degree >= b.degree
+      d = r.degree - b.degree
+      u = r.a.last / b.a.last
+      q += (GCMPoly.new([u]) << d)
+      r += (b*u << d)
+    end
+
+    return q, r
+  end
+
+  def /(other)
+    divmod(other)[0]
+  end
+
+  def %(other)
+    divmod(other)[1]
+  end
+
+  def gcd(other)
+    raise "TODO"
   end
 
   def +(other)
@@ -40,5 +91,15 @@ class GCMPoly
       hi *= h
     end
     sum
+  end
+
+  def ==(other)
+    other.is_a?(GCMPoly) and @a == other.a
+  end
+
+  class << self
+    def [](*a)
+      new(a)
+    end
   end
 end
