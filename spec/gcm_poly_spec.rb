@@ -81,4 +81,11 @@ describe GCMPoly do
       (GCMPoly[a,b,c].divmod(GCMPoly[d,e]))[1]
     )
   end
+
+  it "gcd" do
+    expect(GCMPoly[a,one].gcd GCMPoly[b,one]).to eq GCMPoly[one]
+    u = GCMPoly[a,one] * GCMPoly[b,one] * GCMPoly[c,one]
+    v = GCMPoly[a,one] * GCMPoly[b,one] * GCMPoly[d,one] * GCMPoly[e,one]
+    expect(u.gcd(v)).to eq GCMPoly[a,one] * GCMPoly[b,one]
+  end
 end

@@ -34,7 +34,7 @@ class GCMPoly
   end
 
   def divmod(other)
-    raise ZeroDivisionError, "Can't divide by zero" if other.degree == -1
+    raise ZeroDivisionError, "Can't divide by zero" if other.zero?
     q = GCMPoly.new([])
     r = self
     b = other
@@ -58,7 +58,16 @@ class GCMPoly
   end
 
   def gcd(other)
-    raise "TODO"
+    a = self.to_monic
+    b = other.to_monic
+    a, b = b, a if a.degree < b.degree
+    q, r = a.divmod(b)
+
+    if r.zero?
+      b
+    else
+      b.gcd(r)
+    end
   end
 
   def +(other)
@@ -77,13 +86,13 @@ class GCMPoly
   end
 
   def to_monic
-    return self if @a.empty?
+    return self if zero? or monic?
     factor = @a.last.inverse
     GCMPoly.new @a.map{|c| c * factor }
   end
 
   def eval(h)
-    return GCMField.zero if @a.empty?
+    return GCMField.zero if zero?
     sum = GCMField.zero
     hi = GCMField.one
     @a.each do |b|
@@ -95,6 +104,14 @@ class GCMPoly
 
   def ==(other)
     other.is_a?(GCMPoly) and @a == other.a
+  end
+
+  def monic?
+    @a.last.one?
+  end
+
+  def zero?
+    @a.empty?
   end
 
   class << self
