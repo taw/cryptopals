@@ -58,8 +58,8 @@ class GCMPoly
   end
 
   def gcd(other)
-    raise ZeroDivisionError, "Can't gcd with zero" if zero?
-    raise ZeroDivisionError, "Can't gcd with zero" if other.zero?
+    return other if zero?
+    return self if other.zero?
     a = self.to_monic
     b = other.to_monic
     a, b = b, a if a.degree < b.degree
@@ -177,6 +177,43 @@ class GCMPoly
   # Underlying field has characteristic 2
   def formal_derivative
     GCMPoly.new (0...@a.size-1).map { |i| i.odd? ? GCMField.zero : @a[i+1] }
+  end
+
+  def powmod(exponent, modulus)
+    return GCMPoly[GCMField.zero] if modulus.one?
+    result = GCMPoly[GCMField.one]
+    base = self % modulus
+    while exponent > 0
+      result = result*base%modulus if exponent.odd?
+      exponent = exponent >> 1
+      base = base*base%modulus
+    end
+    result
+  end
+
+  # Algorithm assumes it's a monic square-free polynomial
+  # Is q characteristic ???
+  def distinct_degree_factorization
+    result = []
+    i = 1
+    fstar = self
+    x = GCMPoly[GCMField.zero, GCMField.one]
+    while fstar.degree >= 2*i
+      xqix = x.powmod(2**(128*i), fstar) - x
+      g = fstar.gcd(xqix)
+      unless g.one?
+        result << [g, i]
+        fstar = fstar / g
+      end
+      i += 1
+    end
+    unless fstar.one?
+      result << [fstar, fstar.degree]
+    end
+    if result.empty?
+      result << [self, 1]
+    end
+    result
   end
 
   def **(k)

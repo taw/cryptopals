@@ -111,7 +111,7 @@ describe GCMPoly do
     let(:fc) { GCMPoly[c,one] }
     let(:fd) { GCMPoly[d,one] }
 
-    it "square_free_factorization" do
+    it do
       u = fa*fa*b
       sff = u.square_free_factorization
       expect(sff.map(&:degree).sum).to eq u.degree
@@ -125,7 +125,7 @@ describe GCMPoly do
       expect(sff).to match_array([fa, fa, fb*fc, GCMPoly[d]])
     end
 
-    it "square_free_factorization" do
+    it do
       u = fa**4 * fb**3 * fc**2 * fd * e
       sff = u.square_free_factorization
       expect(sff.map(&:degree).sum).to eq u.degree
@@ -135,6 +135,38 @@ describe GCMPoly do
         fc, fc,
         fd,
         GCMPoly[e]])
+    end
+  end
+
+  describe "distinct_degree_factorization" do
+    let(:fa) { GCMPoly[a,one] }
+    let(:fb) { GCMPoly[b,one] }
+    let(:fc) { GCMPoly[c,one] }
+    let(:fde) { GCMPoly[GCMField.new(456),GCMField.new(123),one] }
+
+    it do
+      u = fa*fb
+      ddf = u.distinct_degree_factorization
+      expect(ddf).to match_array([
+        [fa*fb, 1],
+      ])
+    end
+
+    it do
+      u = fde
+      ddf = u.distinct_degree_factorization
+      expect(ddf).to match_array([
+        [fde, 2],
+      ])
+    end
+
+    it do
+      u = fa*fb*fc*fde
+      ddf = u.distinct_degree_factorization
+      expect(ddf).to match_array([
+        [fa*fb*fc, 1],
+        [fde, 2],
+      ])
     end
   end
 end
