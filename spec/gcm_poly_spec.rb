@@ -1,6 +1,7 @@
 describe GCMPoly do
   let(:zero) { GCMField.zero }
   let(:one) { GCMField.one }
+
   let(:a) { GCMField.random }
   let(:b) { GCMField.random }
   let(:c) { GCMField.random }
@@ -8,6 +9,12 @@ describe GCMPoly do
   let(:e) { GCMField.random }
   let(:f) { GCMField.random }
   let(:g) { GCMField.random }
+
+  let(:fa) { GCMPoly[a,one] }
+  let(:fb) { GCMPoly[b,one] }
+  let(:fc) { GCMPoly[c,one] }
+  let(:fd) { GCMPoly[d,one] }
+  let(:fz) { GCMPoly[GCMField.new(456),GCMField.new(123),one] }
 
   it "==" do
     expect(GCMPoly[a, b, c]).to eq(GCMPoly[a, b, c])
@@ -106,11 +113,6 @@ describe GCMPoly do
   end
 
   describe "square_free_factorization" do
-    let(:fa) { GCMPoly[a,one] }
-    let(:fb) { GCMPoly[b,one] }
-    let(:fc) { GCMPoly[c,one] }
-    let(:fd) { GCMPoly[d,one] }
-
     it do
       u = fa*fa*b
       sff = u.square_free_factorization
@@ -139,11 +141,6 @@ describe GCMPoly do
   end
 
   describe "distinct_degree_factorization" do
-    let(:fa) { GCMPoly[a,one] }
-    let(:fb) { GCMPoly[b,one] }
-    let(:fc) { GCMPoly[c,one] }
-    let(:fde) { GCMPoly[GCMField.new(456),GCMField.new(123),one] }
-
     it do
       u = fa*fb
       ddf = u.distinct_degree_factorization
@@ -153,19 +150,43 @@ describe GCMPoly do
     end
 
     it do
-      u = fde
+      u = fz
       ddf = u.distinct_degree_factorization
       expect(ddf).to match_array([
-        [fde, 2],
+        [fz, 2],
       ])
     end
 
     it do
-      u = fa*fb*fc*fde
+      u = fa*fb*fc*fz
       ddf = u.distinct_degree_factorization
       expect(ddf).to match_array([
         [fa*fb*fc, 1],
-        [fde, 2],
+        [fz, 2],
+      ])
+    end
+  end
+
+  describe "equal_degree_factorization" do
+    it do
+      u = fa*fb*fc
+      edf = u.equal_degree_factorization(1)
+      expect(edf).to match_array([
+        fa, fb, fc,
+      ])
+    end
+  end
+
+  describe "factorization" do
+    it do
+      u = fa*fb*fc*fc*fd*fd*fd*fz*e
+      expect(u.factorization).to match_array([
+        fa,
+        fb,
+        fc, fc,
+        fd, fd, fd,
+        fz,
+        GCMPoly[e],
       ])
     end
   end

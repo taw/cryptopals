@@ -25,7 +25,7 @@ class GCMPoly
     if other.is_a?(GCMField)
       return GCMPoly.new a.map{|b| b*other}
     end
-    sum = GCMPoly.new []
+    sum = GCMPoly.zero
     @a.each do |a|
       sum += other * a
       other <<= 1
@@ -35,15 +35,15 @@ class GCMPoly
 
   def divmod(other)
     raise ZeroDivisionError, "Can't divide by zero" if other.zero?
-    q = GCMPoly.new([])
+    q = GCMPoly.zero
     r = self
     b = other
 
     while r.degree >= b.degree
       d = r.degree - b.degree
       u = r.a.last / b.a.last
-      q += (GCMPoly.new([u]) << d)
-      r += (b*u << d)
+      q += GCMPoly[u] << d
+      r += b*u << d
     end
 
     return q, r
@@ -72,7 +72,7 @@ class GCMPoly
   end
 
   def +(other)
-    return self + GCMPoly.new([other]) if other.is_a?(GCMField)
+    return self + GCMPoly[other] if other.is_a?(GCMField)
     raise unless other.is_a?(GCMPoly)
     m1 = a
     m2 = other.a
@@ -131,6 +131,7 @@ class GCMPoly
     GCMPoly.new result
   end
 
+  # It's not supposed to be in monic conversion business
   def square_free_factorization
     f = self
     result = []
@@ -216,12 +217,72 @@ class GCMPoly
     result
   end
 
+  def equal_degree_factorization(d)
+    n = degree
+    raise unless n % d == 0
+    r = n / d
+    f = self
+    s = [f]
+    q = 2**128
+    one = GCMPoly.one
+
+    while s.size < r
+      h = GCMPoly.random(n)
+      g = h.gcd(f)
+
+      if g.one?
+        x = (q**d - 1) / 3
+        g = h.powmod(x, f) - one
+      end
+
+      s = s.flat_map do |u|
+        if u.degree == d
+          [u]
+        else
+          z = g.gcd(u)
+          if z.one? or z == u
+            [u]
+          else
+            [z, u/z]
+          end
+        end
+      end
+    end
+
+    s
+  end
+
+  # Connect all algorithms
+  def factorization
+    return [self] if degree <= 1
+    f = self
+    result = []
+    xs = 0
+
+    while f.a.first.zero?
+      result << GCMField.x
+      f >>= 1
+    end
+
+    unless f.monic?
+      result << GCMPoly[f.a.last]
+      f = f.to_monic
+    end
+
+    sff_done, sff_todo = f.square_free_factorization.partition{|u| u.degree <= 1 }
+    result += sff_done
+
+    ddf_todo = sff_todo.flat_map{|f| f.distinct_degree_factorization}
+
+    result + ddf_todo.flat_map{|f,d| f.equal_degree_factorization(d) }
+  end
+
   def **(k)
     raise unless k.is_a?(Integer)
     if k < 0
       return inverse ** (-k)
     end
-    result = GCMPoly[GCMField.one]
+    result = GCMPoly.one
     n = self
     while k > 0
       if k.odd?
@@ -240,6 +301,22 @@ class GCMPoly
   class << self
     def [](*a)
       new(a)
+    end
+
+    def random(degree)
+      GCMPoly.new (0..degree).map{ GCMField.random }
+    end
+
+    def zero
+      GCMPoly[]
+    end
+
+    def one
+      GCMPoly[GCMField.one]
+    end
+
+    def x
+      GCMPoly[GCMField.zero, GCMField.one]
     end
   end
 end
