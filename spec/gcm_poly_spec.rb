@@ -189,11 +189,7 @@ describe GCMPoly do
 
   it "roots" do
     u = fa*fb*fc*fc*fd*fd*fd*fz*e
-    expect(u.roots).to match_array([
-      a,
-      b,
-      c,
-      d,
-    ])
+    expect(u.roots).to match_array([a, b, c, d])
+    expect(u.roots_by_factorization).to match_array([a, b, c, d])
   end
 end

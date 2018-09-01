@@ -69,6 +69,23 @@ describe Chal63 do
     expect(monic_poly.eval(h)).to be_zero
   end
 
-  # Actual hack
-  pending
+  it "candidate_keys" do
+    keys = chal.candidate_keys(msg1, msg2)
+    expect(keys).to include([h, mask])
+  end
+
+  # From candidate_keys
+  it "create_fake_message" do
+    ptxor = "PWNED!!!".xor("All your") + "\x00".b*23
+    msg3 = chal.create_fake_message(h, mask, "Version 3", ct1, ptxor)
+
+    aad3, ct3, tag3 = msg3
+    # This part is happening on victim's machine
+    decoded = GCM.decrypt(key, iv, aad3, ct3)
+    expect(decoded).to eq([
+      "Version 3",
+      "PWNED!!! base are belong to us!",
+      tag3,
+    ])
+  end
 end

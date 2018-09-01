@@ -145,7 +145,8 @@ module GCM
     end
 
     def encrypt_block(key, block)
-      raise unless block.size == 16 and key.size == 16
+      raise "Key size is not 16 bytes" unless key.size == 16
+      raise "Block size is not 16 bytes" unless block.size == 16
       crypt = OpenSSL::Cipher.new("AES-128-ECB")
       crypt.encrypt
       crypt.key = key

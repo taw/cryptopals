@@ -41,7 +41,7 @@ class GCMPoly
 
     while r.degree >= b.degree
       d = r.degree - b.degree
-      u = r.a.last / b.a.last
+      u = r.highest / b.highest
       q += GCMPoly[u] << d
       r += b*u << d
     end
@@ -193,12 +193,11 @@ class GCMPoly
   end
 
   # Algorithm assumes it's a monic square-free polynomial
-  # Is q characteristic ???
   def distinct_degree_factorization
     result = []
     i = 1
     fstar = self
-    x = GCMPoly[GCMField.zero, GCMField.one]
+    x = GCMPoly.x
     while fstar.degree >= 2*i
       xqix = x.powmod(2**(128*i), fstar) - x
       g = fstar.gcd(xqix)
@@ -215,6 +214,21 @@ class GCMPoly
       result << [self, 1]
     end
     result
+  end
+
+  # It simply drops high degree factors as they won't lead to roots
+  def distinct_degree_factorization_only_1
+    result = []
+    x = GCMPoly.x
+
+    return nil if degree < 1
+    return self if degree == 1
+
+    xqix = x.powmod(2**128, self) - x
+    g = self.gcd(xqix)
+
+    return g unless g.one?
+    return nil
   end
 
   def equal_degree_factorization(d)
@@ -257,15 +271,14 @@ class GCMPoly
     return [self] if degree <= 1
     f = self
     result = []
-    xs = 0
 
-    while f.a.first.zero?
+    while f.lowest.zero?
       result << GCMField.x
       f >>= 1
     end
 
     unless f.monic?
-      result << GCMPoly[f.a.last]
+      result << GCMPoly[f.highest]
       f = f.to_monic
     end
 
@@ -279,11 +292,33 @@ class GCMPoly
 
   # We don't need full factorization for this
   # so we can be a bit more performant here
-  def roots
+  def roots_by_factorization
     factorization
       .select{|f| f.degree == 1}
-      .map{|f| f.a.first}
+      .map(&:lowest)
       .uniq
+  end
+
+  # This skips a lot of slow factorization parts which are not necessary
+  # if all we want is roots
+  def roots
+    return [] if zero?
+    f = to_monic
+    result = []
+
+    while f.lowest.zero?
+      result << GCMField.x
+      f >>= 1
+    end
+
+    sff_done, sff_todo = f.square_free_factorization.partition{|u| u.degree <= 1 }
+    result += sff_done.map(&:lowest)
+
+    ddf_todo = sff_todo.map{|f| f.distinct_degree_factorization_only_1}.compact
+
+    result += ddf_todo.flat_map{|f| f.equal_degree_factorization(1) }.map(&:lowest)
+
+    result.uniq
   end
 
   def **(k)
@@ -305,6 +340,14 @@ class GCMPoly
 
   def inspect
     "GCMPoly<#{@a.map{|u| "%032x" % u.value}.join(", ")}>"
+  end
+
+  def lowest
+    @a.first
+  end
+
+  def highest
+    @a.last
   end
 
   class << self

@@ -24,4 +24,22 @@ class Chal63
     blocks << GCM.final_block(aad, ct)
     GCMPoly.new [GCMField.zero, *blocks.reverse.map{|i| GCMField.new(i) }]
   end
+
+  # It's pretty slow implementation
+  def candidate_keys(msg1, msg2)
+    aad1, ct1, tag1 = msg1
+    extract_poly(msg1, msg2)
+      .roots
+      .map{|h| [h, msg_blocks(aad1, ct1).eval(h) + GCMField.new(tag1)] }
+  end
+
+  # It's CTR, so we can use any CTR attack to deal with encryption
+  # This is simplest version of the attack:
+  # * we can completely replace aad
+  # * in CTR ptxor = ctxor
+  def create_fake_message(h, mask, aad, ct, ptxor)
+    ctx = ct.xor(ptxor)
+    tag = msg_blocks(aad, ctx).eval(h) + mask
+    [aad, ctx, tag.to_i]
+  end
 end
