@@ -277,6 +277,15 @@ class GCMPoly
     result + ddf_todo.flat_map{|f,d| f.equal_degree_factorization(d) }
   end
 
+  # We don't need full factorization for this
+  # so we can be a bit more performant here
+  def roots
+    factorization
+      .select{|f| f.degree == 1}
+      .map{|f| f.a.first}
+      .uniq
+  end
+
   def **(k)
     raise unless k.is_a?(Integer)
     if k < 0

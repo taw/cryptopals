@@ -167,27 +167,33 @@ describe GCMPoly do
     end
   end
 
-  describe "equal_degree_factorization" do
-    it do
-      u = fa*fb*fc
-      edf = u.equal_degree_factorization(1)
-      expect(edf).to match_array([
-        fa, fb, fc,
-      ])
-    end
+  it "equal_degree_factorization" do
+    u = fa*fb*fc
+    edf = u.equal_degree_factorization(1)
+    expect(edf).to match_array([
+      fa, fb, fc,
+    ])
   end
 
-  describe "factorization" do
-    it do
-      u = fa*fb*fc*fc*fd*fd*fd*fz*e
-      expect(u.factorization).to match_array([
-        fa,
-        fb,
-        fc, fc,
-        fd, fd, fd,
-        fz,
-        GCMPoly[e],
-      ])
-    end
+  it "factorization" do
+    u = fa*fb*fc*fc*fd*fd*fd*fz*e
+    expect(u.factorization).to match_array([
+      fa,
+      fb,
+      fc, fc,
+      fd, fd, fd,
+      fz,
+      GCMPoly[e],
+    ])
+  end
+
+  it "roots" do
+    u = fa*fb*fc*fc*fd*fd*fd*fz*e
+    expect(u.roots).to match_array([
+      a,
+      b,
+      c,
+      d,
+    ])
   end
 end
