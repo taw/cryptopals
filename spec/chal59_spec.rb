@@ -1,6 +1,6 @@
 describe Chal59 do
   let(:prime) { 233970423115425145524320034830162017933 }
-  let(:group) { ECC.new(prime, -95051, 11279326) }
+  let(:group) { WeierstrassCurve.new(prime, -95051, 11279326) }
   let(:base_point) { [182, 85518893674295321206118380980485522083] }
   let(:order) { 29246302889428143187362802287225875743 }
   it do
@@ -22,9 +22,9 @@ describe Chal59 do
 
   describe "hack" do
     let(:attacker) { Chal59::Attacker.new }
-    let(:group1) { ECC.new(prime, -95051, 210) }
-    let(:group2) { ECC.new(prime, -95051, 504) }
-    let(:group3) { ECC.new(prime, -95051, 727) }
+    let(:group1) { WeierstrassCurve.new(prime, -95051, 210) }
+    let(:group2) { WeierstrassCurve.new(prime, -95051, 504) }
+    let(:group3) { WeierstrassCurve.new(prime, -95051, 727) }
     let(:order1) { 233970423115425145550826547352470124412 }
     let(:order2) { 233970423115425145544350131142039591210 }
     let(:order3) { 233970423115425145545378039958152057148 }

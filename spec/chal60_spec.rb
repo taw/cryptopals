@@ -1,8 +1,8 @@
 describe Chal60 do
   let(:prime) { 233970423115425145524320034830162017933 }
   # v^2 = u^3 + 534*u^2 + u
-  let(:montgomery_curve) { Chal60::MontgomeryCurve.new(prime, 534, 1) }
-  let(:weierstrass_curve) { ECC.new(prime, -95051, 11279326) }
+  let(:montgomery_curve) { MontgomeryCurve.new(prime, 534, 1) }
+  let(:weierstrass_curve) { WeierstrassCurve.new(prime, -95051, 11279326) }
   let(:order) { 29246302889428143187362802287225875743 }
   let(:u) { 4 }
   let(:v) { 85518893674295321206118380980485522083 }

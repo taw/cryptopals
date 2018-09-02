@@ -1,4 +1,4 @@
-class ECC
+class WeierstrassCurve
   attr_reader :p, :a, :b
   def initialize(p, a, b)
     @p = p
@@ -97,6 +97,6 @@ class ECC
   end
 
   def ==(other)
-    other.is_a?(ECC) and self.p == other.p and self.a == other.a and self.b == other.b
+    other.is_a?(WeierstrassCurve) and self.p == other.p and self.a == other.a and self.b == other.b
   end
 end
