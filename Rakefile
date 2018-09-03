@@ -1,4 +1,7 @@
 require "pathname"
+require "paint"
+
+task "default" => "status"
 
 desc "Create files for challenge"
 task "create", [:number] do |t, args|
@@ -35,9 +38,9 @@ task "status" do
   (1..64).each_slice(8).each do |slice|
     puts slice.map{|i|
       if done.include?(i)
-        "[%02d]" % i
+        Paint["[%02d]" % i, :green]
       elsif started.include?(i)
-        "[..]"
+        Paint["[..]", :yellow ]
       else
         "[  ]"
       end
