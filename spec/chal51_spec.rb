@@ -1,7 +1,4 @@
 describe Chal51 do
-  let(:chal) { Chal51.new }
-  let(:session_id) { Base64.strict_encode64(Random::DEFAULT.bytes(32)) }
-
   describe "Crypto Boxes" do
     let(:session_id) { Base64.strict_encode64("All your base are belong to us!!") }
     let(:box) { described_class.new(session_id) }
@@ -25,5 +22,24 @@ describe Chal51 do
   end
 
   # actual hack
-  pending
+  describe "Hack" do
+    let(:chal) { Chal51.new }
+    let(:session_id) { Base64.strict_encode64(Random::DEFAULT.bytes(32)) }
+
+    describe "Hacking CTR" do
+      let(:box) { Chal51::BoxCTR.new(session_id) }
+
+      it do
+        expect(chal.hack(box)).to eq(session_id)
+      end
+    end
+
+    describe "Hacking CBC" do
+      let(:box) { Chal51::BoxCBC.new(session_id) }
+
+      it do
+        expect(chal.hack(box)).to eq(session_id)
+      end
+    end
+  end
 end
