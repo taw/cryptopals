@@ -22,14 +22,25 @@ end
 
 desc "Print done status"
 task "status" do
-  done = (1..64).select{|i|
-    path=Pathname("#{__dir__}/spec/chal#{i}_spec.rb")
-    path.exist? and path.read =~ /expect/ and path.read !~ /pending/
-  }.to_set
+  started = Set[]
+  done = Set[]
+  (1..64).each do |i|
+    path = Pathname("#{__dir__}/spec/chal#{i}_spec.rb")
+    if path.exist?
+      started << i
+      done << i if path.read =~ /expect/ and path.read !~ /pending/
+    end
+  end
 
   (1..64).each_slice(8).each do |slice|
     puts slice.map{|i|
-      done.include?(i) ? "[%02d]" % i : "[  ]"
+      if done.include?(i)
+        "[%02d]" % i
+      elsif started.include?(i)
+        "[..]"
+      else
+        "[  ]"
+      end
     }.join(" ")
   end
 
