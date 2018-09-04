@@ -2,7 +2,7 @@ describe Chal59 do
   let(:prime) { 233970423115425145524320034830162017933 }
   let(:group) { WeierstrassCurve.new(prime, -95051, 11279326) }
   let(:base_point) { [182, 85518893674295321206118380980485522083] }
-  let(:order) { 29246302889428143187362802287225875743 }
+  let(:order) { 233970423115425145498902418297807005944 }
   it do
     expect(group.valid?(base_point))
     expect(group.multiply(base_point, order)).to eq :infinity

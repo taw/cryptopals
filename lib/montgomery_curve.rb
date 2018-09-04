@@ -41,10 +41,14 @@ class MontgomeryCurve
     [v, @p-v].sort
   end
 
-  def valid?(u, v)
+  def valid?(u, v=nil)
     bvv = (u*u*u + @a*u*u + u) % @p
     vv = (bvv * @binv) % @p
-    0 == (v*v - vv) % @p
+    if v
+      0 == (v*v - vv) % @p
+    else
+      !!vv.sqrtmod(@p)
+    end
   end
 
   def associated_weierstrass_curve
@@ -65,5 +69,29 @@ class MontgomeryCurve
     u = ((x - @a * @third) * @binv) % @p
     v = (y * @binv) % @p
     [u, v]
+  end
+
+  def random_point
+    while true
+      u = rand(1...@p)
+      return u if calculate_v(u)
+    end
+  end
+
+  def random_twist_point
+    while true
+      u = rand(1...@p)
+      return u unless calculate_v(u)
+    end
+  end
+
+  # Will loop forever if twist_order is invalid
+  # If q is not prime, it can give you any non-1 order which divides q
+  def random_twist_point_of_order(twist_order, q)
+    raise unless twist_order % q == 0
+    while true
+      u = ladder(random_twist_point, twist_order/q)
+      return u if u != 0 and ladder(u, q) == 0
+    end
   end
 end
