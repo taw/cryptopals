@@ -84,13 +84,34 @@ class WeierstrassCurve
     end
   end
 
-  # Super slow
-  def points
+  # Various algorithms for counting points:
+  # O(p^2) - brute force
+  def points_n2
     result = [:infinity]
     (0...@p).each do |x|
       (0...@p).each do |y|
         point = [x,y]
         result << point if valid?(point)
+      end
+    end
+    result
+  end
+
+  # O(p^1) - very slow
+  def points
+    result = [:infinity]
+    (0...@p).each do |x|
+      yy = ((x**3) + a*x + b) % @p
+      y = yy.sqrtmod(@p)
+      next unless y
+      point = [x, y]
+      result << point if valid?(point)
+      # p-y === y
+      # p === 2y
+      # So if p is even or y is zero
+      if y != 0
+        point2 = [x, @p - y]
+        result << point2 if valid?(point2)
       end
     end
     result
