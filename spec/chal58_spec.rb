@@ -1,41 +1,75 @@
 describe Chal58 do
-  P = 11470374874925275658116663507232161402086650258453896274534991676898999262641581519101074740642369848233294239851519212341844337347119899874391456329785623
-  Q = 335062023296420808191071248367701059461
-  J = 34233586850807404623475048381328686211071196701374230492615844865929237417097514638999377942356150481334217896204702
-  G = 622952335333961296978159266084741085889881358738459939978290179936063635566740258555167783009058567397963466103140082647486611657350811560630587013183357
+  let(:attacker) { Chal58::Attacker.new }
+  let(:target) { Chal58::Client.new }
+  let(:p) { Chal58::P }
+  let(:g) { Chal58::G }
+  let(:q) { Chal58::Q }
+  let(:j) { (p-1) / q }
 
-  describe "20 bit hack" do
-    let(:range) { 0..(2**20) }
-    let(:y) { 7760073848032689505395005705677365876654629189298052775754597607446617558600394076764814236081991643094239886772481052254010323780165093955236429914607119 }
+  describe "Kangaroo Log" do
+    let(:kangaroo) { KangarooDiscreteLogarithm.log(g, y, p, range.min, range.max) }
+    let(:k) { kangaroo[0] }
+    let(:i) { kangaroo[1] }
+    let(:gk) { g.powmod(k, p) }
 
-    it do
-      k, i = KangarooDiscreteLogarithm.log(G, y, P, range.min, range.max)
-      puts "Took #{i} trials for 20 bits"
-      expect(G.powmod(k, P)).to eq(y)
+    describe "20 bit hack" do
+      let(:range) { 0..(2**20) }
+      let(:y) { 7760073848032689505395005705677365876654629189298052775754597607446617558600394076764814236081991643094239886772481052254010323780165093955236429914607119 }
+
+      it do
+        # puts "Took #{i} trials for 20 bits"
+        expect(gk).to eq(y)
+      end
+    end
+
+
+    describe "30 bit hack" do
+      let(:range) { 0..(2**30) }
+      let(:y) { g.powmod(rand(range), p) }
+
+      it do
+        # puts "Took #{i} trials for 30 bits"
+        expect(gk).to eq(y)
+      end
+    end
+
+    describe "40 bit hack" do
+      let(:range) { 0..(2**40) }
+      let(:y) { 9388897478013399550694114614498790691034187453089355259602614074132918843899833277397448144245883225611726912025846772975325932794909655215329941809013733 }
+
+      it do
+        # puts "Took #{i} trials for 40 bits"
+        expect(gk).to eq(y)
+      end
     end
   end
 
-
-  describe "30 bit hack" do
-    let(:range) { 0..(2**30) }
-    let(:k) { rand(range) }
-    let(:y) { G.powmod(k, P) }
-
-    it do
-      k, i = KangarooDiscreteLogarithm.log(G, y, P, range.min, range.max)
-      puts "Took #{i} trials for 30 bits"
-      expect(G.powmod(k, P)).to eq(y)
+  describe "group" do
+    it "is valid" do
+      expect(g.powmod(q, p)).to eq(1)
+      expect(j * q).to eq(p - 1)
     end
   end
 
-  describe "40 bit hack" do
-    let(:range) { 0..(2**40) }
-    let(:y) { 9388897478013399550694114614498790691034187453089355259602614074132918843899833277397448144245883225611726912025846772975325932794909655215329941809013733 }
-
+  describe "divisors" do
+    let(:divisors) { attacker.small_divisors }
+    let(:product_of_divisors) { divisors.reduce{|u,v| u*v} }
     it do
-      k, i = KangarooDiscreteLogarithm.log(G, y, P, range.min, range.max)
-      puts "Took #{i} trials for 40 bits"
-      expect(G.powmod(k, P)).to eq(y)
+      divisors.each do |divisor|
+        expect(divisor).to be_prime
+        expect(j % divisor).to eq(0)
+      end
+      # That's different from Chal 57
+      expect(product_of_divisors).to be < q
+      expect(product_of_divisors).to eq(attacker.product_of_small_divisors)
+    end
+  end
+
+  describe "hack" do
+    let(:secret_key) { target.instance_eval{ @a } }
+    let(:partial_recovered_key) { attacker.hack_partial_key(target) }
+    it do
+      expect(partial_recovered_key).to eq(secret_key % attacker.product_of_small_divisors)
     end
   end
 
