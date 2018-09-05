@@ -8,6 +8,10 @@ class Chal58
       @a = rand(2...Q)
     end
 
+    def ga
+      G.powmod(@a, P)
+    end
+
     def call(gb)
       key = gb.powmod(@a, P)
       # msg doesn't need to be the same every time
@@ -51,7 +55,19 @@ class Chal58
       Integer.chinese_remainder(reminders, small_divisors)
     end
 
-    # TODO ...
+    def hack(target)
+      r = product_of_small_divisors
+      n = hack_partial_key(target)
+      g_minus_n = G.powmod(n, P).invmod(P)
+      g_r = G.powmod(r, P)
+      m_range = (0..((Q-1)/r))
+      g_a = target.ga
+
+      g_a_minus_n = (g_a * g_minus_n) % P
+
+      m, i = KangarooDiscreteLogarithm.log(g_r, g_a_minus_n, P, m_range.min, m_range.max)
+      [m*r + n, i]
+    end
   end
 
   def self.hmac(key, msg)

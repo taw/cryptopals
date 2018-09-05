@@ -65,7 +65,7 @@ describe Chal58 do
     end
   end
 
-  describe "hack" do
+  describe "hack_partial_key" do
     let(:secret_key) { target.instance_eval{ @a } }
     let(:partial_recovered_key) { attacker.hack_partial_key(target) }
     it do
@@ -73,6 +73,12 @@ describe Chal58 do
     end
   end
 
-  # Hack
-  pending
+  describe "hack" do
+    let(:secret_key) { target.instance_eval{ @a } }
+    it do
+      recovered_key, i = attacker.hack(target)
+      # puts "Took #{i} trials for hacking the whole key"
+      expect(recovered_key).to eq(secret_key)
+    end
+  end
 end
