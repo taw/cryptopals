@@ -17,7 +17,7 @@ class MontgomeryCurve
     end
   end
 
-  def ladder(u, k)
+  def constant_time_ladder(u, k)
     u2, w2 = [1, 0]
     u3, w3 = [u, 1]
 
@@ -30,7 +30,40 @@ class MontgomeryCurve
       u2, u3 = cswap(u2, u3, b)
       w2, w3 = cswap(w2, w3, b)
     end
+
     (u2 * w2.powmod(@p-2, @p)) % @p
+  end
+
+  def ladder(u, k)
+    u2, w2 = [1, 0]
+    u3, w3 = [u, 1]
+
+    bitlen = [@p_bitlen-1, k.to_s(2).size].min
+    (0..bitlen).reverse_each do |i|
+      b = 1 & (k >> i)
+      if b == 0
+        u3, w3 = ((u2*u3 - w2*w3)**2) % @p, (u * (u2*w3 - w2*u3)**2) % @p
+        u2, w2 = ((u2**2 - w2**2)**2) % @p, (4*u2*w2 * (u2**2 + @a*u2*w2 + w2**2)) % @p
+      else
+        u2, u3 = u3, u2
+        w2, w3 = w3, w2
+        u3, w3 = ((u2*u3 - w2*w3)**2) % @p, (u * (u2*w3 - w2*u3)**2) % @p
+        u2, w2 = ((u2**2 - w2**2)**2) % @p, (4*u2*w2 * (u2**2 + @a*u2*w2 + w2**2)) % @p
+        u2, u3 = u3, u2
+        w2, w3 = w3, w2
+      end
+    end
+
+    if w2 == 0
+      inv_w2 = 0
+    else
+      inv_w2 = w2.invmod(@p)
+    end
+    (u2 * inv_w2) % @p
+  end
+
+  def multiply(u, k)
+    ladder(u, k)
   end
 
   def calculate_v(u)
@@ -89,9 +122,10 @@ class MontgomeryCurve
   # If q is not prime, it can give you any non-1 order which divides q
   def random_twist_point_of_order(twist_order, q)
     raise unless twist_order % q == 0
-    while true
+    1000.times do
       u = ladder(random_twist_point, twist_order/q)
       return u if u != 0 and ladder(u, q) == 0
     end
+    raise "Failed to find twist factor of order #{q}, something is probably wrong"
   end
 end

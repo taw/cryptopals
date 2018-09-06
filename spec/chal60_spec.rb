@@ -3,6 +3,8 @@ describe Chal60 do
   # v^2 = u^3 + 534*u^2 + u
   let(:montgomery_curve) { MontgomeryCurve.new(prime, 534, 1) }
   let(:weierstrass_curve) { WeierstrassCurve.new(prime, -95051, 11279326) }
+  let(:base_point) { u }
+  let(:base_point_order) { 29246302889428143187362802287225875743 }
   let(:order) { 233970423115425145498902418297807005944 }
   let(:u) { 4 }
   let(:v) { 85518893674295321206118380980485522083 }
@@ -91,6 +93,46 @@ describe Chal60 do
     end
   end
 
+  describe "handshake" do
+    let(:alice) { Chal60::Client.new(montgomery_curve, base_point, base_point_order) }
+    let(:bob) { Chal60::Client.new(montgomery_curve, base_point, base_point_order) }
+    let(:alice_public) { alice.public }
+    let(:bob_public) { bob.public }
+    it do
+      alice.receive(bob_public)
+      bob.receive(alice_public)
+      expect(alice.key).to eq(bob.key)
+    end
+  end
+
   # All the hacking
-  pending
+  describe "attack" do
+    let(:client) { Chal60::Client.new(montgomery_curve, base_point, order) }
+    let(:attackable_twist_factors) { [11, 107, 197, 1621, 105143, 405373, 2323367] }
+    let(:attackable_product) { attackable_twist_factors.reduce{ |u,v| u*v } }
+    let(:secret) { client.send(:secret) }
+    let(:attacker) {
+      Chal60::Attacker.new(
+        client,
+        montgomery_curve,
+        twist_order,
+        attackable_twist_factors,
+      )
+    }
+    let(:expected_first_pass) { attackable_twist_factors.map{ |k| [k, [secret % k, -secret % k].sort] } }
+    let(:expected_second_pass) {
+      [secret % attackable_product, -secret % attackable_product].sort
+    }
+    it do
+      # expect(attacker.first_pass).to eq(expected_first_pass)
+      attacker.instance_variable_set(:@first_pass, expected_first_pass) # HAX
+      # expect(attacker.second_pass).to eq(expected_second_pass)
+      expect(attacker.second_pass).to include(expected_second_pass[0])
+      expect(attacker.second_pass).to include(expected_second_pass[1])
+      # expect(attacker.secret).to eq(secret)
+    end
+
+    # Full hack
+    pending
+  end
 end
