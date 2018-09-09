@@ -54,6 +54,31 @@ describe Chal60 do
     expect( montgomery_curve.ladder(6, twist_order+1) ).to eq(6)
   end
 
+  describe "#to_twist" do
+    let(:twist_curve) { montgomery_curve.to_twist }
+    let(:double_twist_curve) { twist_curve.to_twist }
+    let(:twist_weierstrass_curve) { twist_curve.to_twist }
+
+    it do
+      expect(double_twist_curve).to eq(montgomery_curve)
+      expect(twist_weierstrass_curve).to_not be_nil
+    end
+  end
+
+  # It doesn't work on curve, but it works if we convert it to a different curve
+  describe "#add" do
+    let(:index_a) { rand(100..1000) }
+    let(:index_b) { rand(1001..2000) }
+    let(:a) { montgomery_curve.ladder(base_point, index_a) }
+    let(:b) { montgomery_curve.ladder(base_point, index_b) }
+    let(:c) { montgomery_curve.add_by_weierstass(a, b) }
+    let(:expected_c) { montgomery_curve.ladder(base_point, index_b + index_a) }
+
+    it do
+      expect(c).to include(expected_c)
+    end
+  end
+
   it "maps point correctly between two curve formats" do
     [0, 1, 2, 1000, 123456, order-2, order-1, order].each do |k|
       gkm = montgomery_curve.ladder(u, k)
@@ -82,9 +107,9 @@ describe Chal60 do
     10.times do
       x, y = weierstrass_curve.random_point
       expect(weierstrass_curve.valid?([x, y])).to eq true
-      u, v = montgomery_curve.from_weierstrass(x, y)
+      u, v = montgomery_curve.from_weierstrass([x, y])
       expect(montgomery_curve.valid?(u, v)).to eq true
-      x1, y1 = montgomery_curve.to_weierstrass(u, v)
+      x1, y1 = montgomery_curve.to_weierstrass([u, v])
       expect([x1,y1]).to eq([x,y])
     end
   end

@@ -1,5 +1,6 @@
 # B*v^2 = u^3 + A*u^2 + u
 class MontgomeryCurve
+  attr_reader :p, :a, :b
   def initialize(p, a, b)
     @p = p
     @a = a
@@ -7,6 +8,30 @@ class MontgomeryCurve
     @binv = @b.invmod(@p)
     @third = 3.invmod(@p)
     @p_bitlen = @p.to_s(2).size
+  end
+
+  def to_twist
+    if @b.sqrtmod(@p)
+      twist_b = (2...@p).find{|x| not x.sqrtmod(@p) }
+      raise "Math doesn't work" unless twist_b and not twist_b.sqrtmod(@p)
+    else
+      twist_b = 1
+      raise "Math doesn't work" unless 1.sqrtmod(@p)
+    end
+
+    MontgomeryCurve.new(@p, @a, twist_b)
+  end
+
+  def add_by_weierstass(a, b)
+    w = associated_weierstrass_curve
+    w_ax = to_weierstrass_all(a)
+    w_bx = to_weierstrass_all(b)
+    w_cx = w_ax.flat_map{|w_a|
+      w_bx.map{|w_b|
+        w.add(w_a, w_b)
+      }
+    }.uniq
+    w_cx.map{|w_c| from_weierstrass(w_c)[0] }
   end
 
   def cswap(x, y, c)
@@ -119,14 +144,35 @@ class MontgomeryCurve
   end
 
   # This seems backwards from what I've read
-  # Also doesn't handle point at infinity
-  def to_weierstrass(u, v)
+  def to_weierstrass(uv)
+    if uv.is_a?(Array)
+      u, v = uv
+      return :infinity if u == 0
+    else
+      return :infinity if uv == 0
+      u = uv
+      v, p_minus_v = calculate_v(u)
+      raise "Point #{u} doesn't look valid for #{self}" unless v
+    end
     x = (@b*u + @a*@third) % @p
     y = (v * @b) % @p
     [x, y]
   end
 
-  def from_weierstrass(x, y)
+  def to_weierstrass_all(uv)
+    if uv.is_a?(Array)
+      [to_weierstrass(uv)]
+    else
+      return [:infinity] if uv == 0
+      u = uv
+      v, p_minus_v = calculate_v(u)
+      [to_weierstrass([u, v]), to_weierstrass([u, p_minus_v])]
+    end
+  end
+
+  def from_weierstrass(xy)
+    return [0, 1] if xy == :infinity
+    x, y = xy
     u = ((x - @a * @third) * @binv) % @p
     v = (y * @binv) % @p
     [u, v]
@@ -155,5 +201,9 @@ class MontgomeryCurve
       return u if u != 0 and ladder(u, q) == 0
     end
     raise "Failed to find twist factor of order #{q}, something is probably wrong"
+  end
+
+  def ==(other)
+    other.is_a?(self.class) and @p == other.p and @a == other.a and @b == other.b
   end
 end
