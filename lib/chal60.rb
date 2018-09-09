@@ -16,15 +16,19 @@ class Chal60
         @first_pass = []
         # First pass, get stuff modulo small primes
         # Unfortunately every factor has two matches, k and tf-k
+        #
         # It's also really damn slow
+        # even with a bunch of hacks to speed it up
+        # On Weierstrass curve it's easy to do O(sqrt(n)) baby step giant step this
         @attackable_twist_factors.each do |tf|
           puts "HACKING #{tf}"
           point = @curve.random_twist_point_of_order(@twist_order, tf)
           key = @client.receive(point)
-          puts "BF #{tf}"
-          found = (0...tf).find{ |i| @curve.ladder(point, i) == key }
+          found = @curve.each_multiple(point, tf-1){|x,i|
+            break i if x == key
+          }
           raise "Math doesn't work" unless found
-          first_pass << [tf, [found, tf-found]]
+          first_pass << [tf, [found, (tf-found)%tf].uniq]
         end
       end
       @first_pass

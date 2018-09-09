@@ -54,16 +54,44 @@ class MontgomeryCurve
       end
     end
 
-    if w2 == 0
-      inv_w2 = 0
-    else
-      inv_w2 = w2.invmod(@p)
-    end
-    (u2 * inv_w2) % @p
+    (u2 * inverse(w2)) % @p
+  end
+
+  def inverse(u)
+    return 0 if u == 0
+    u.invmod(@p)
   end
 
   def multiply(u, k)
     ladder(u, k)
+  end
+
+  def diff_add(a, b, b_minus_a)
+    u = b_minus_a
+    u2, w2 = [b, 1]
+    u3, w3 = [a, 1]
+
+    if b_minus_a == 0
+      u4 = ((u2**2 - w2**2)**2) % @p
+      w4 = (4*u2*w2 * (u2**2 + @a*u2*w2 + w2**2)) % @p
+    else
+      u4 = ((u2*u3 - w2*w3)**2) % @p
+      w4 = (u * (u2*w3 - w2*u3)**2) % @p
+    end
+
+    (u4 * inverse(w4)) % @p
+  end
+
+  def each_multiple(point, last_index)
+    yield(0, 0)
+
+    point_i = point
+    diff = 0
+
+    (1..last_index).each do |index|
+      yield(point_i, index)
+      point_i, diff = diff_add(point, point_i, diff), point_i
+    end
   end
 
   def calculate_v(u)

@@ -23,6 +23,29 @@ describe Chal60 do
     expect((order - (prime+1)).abs <= 2 * (prime**0.5)).to be true
   end
 
+  describe "#diff_add" do
+    let(:index_a) { rand(100..1000) }
+    let(:index_b) { rand(1001..2000) }
+    let(:a) { montgomery_curve.ladder(base_point, index_a) }
+    let(:b) { montgomery_curve.ladder(base_point, index_b) }
+    let(:b_minus_a) { montgomery_curve.ladder(base_point, index_b - index_a) }
+    let(:c) { montgomery_curve.diff_add(a, b, b_minus_a) }
+    let(:expected_c) { montgomery_curve.ladder(base_point, index_b + index_a) }
+
+    describe "can differencially add arbitrary points on the curve" do
+      it do
+        expect(c).to eq(expected_c)
+      end
+    end
+
+    describe "it also works with doubling" do
+      let(:index_b) { index_a }
+      it do
+        expect(c).to eq(expected_c)
+      end
+    end
+  end
+
   it "has correct twist_order" do
     expect(twist_order + order).to eq(2 * prime + 2)
     expect(twist_factors.reduce{|a,b| a*b}).to eq(twist_order)
@@ -31,7 +54,7 @@ describe Chal60 do
     expect( montgomery_curve.ladder(6, twist_order+1) ).to eq(6)
   end
 
-  it "maps point correctly between two curve formatss" do
+  it "maps point correctly between two curve formats" do
     [0, 1, 2, 1000, 123456, order-2, order-1, order].each do |k|
       gkm = montgomery_curve.ladder(u, k)
       gkw = weierstrass_curve.multiply(g, k)
@@ -119,12 +142,12 @@ describe Chal60 do
         attackable_twist_factors,
       )
     }
-    let(:expected_first_pass) { attackable_twist_factors.map{ |k| [k, [secret % k, -secret % k].sort] } }
+    let(:expected_first_pass) { attackable_twist_factors.map{ |k| [k, [secret % k, -secret % k].uniq.sort] } }
     let(:expected_second_pass) {
       [secret % attackable_product, -secret % attackable_product].sort
     }
     it do
-      # expect(attacker.first_pass).to eq(expected_first_pass)
+      expect(attacker.first_pass).to eq(expected_first_pass)
       attacker.instance_variable_set(:@first_pass, expected_first_pass) # HAX
       # expect(attacker.second_pass).to eq(expected_second_pass)
       expect(attacker.second_pass).to include(expected_second_pass[0])
