@@ -23,7 +23,8 @@ describe Chal60 do
   # All the hacking
   describe "attack" do
     let(:client) { Chal60::Client.new(montgomery_curve, base_point, order) }
-    let(:attackable_twist_factors) { [11, 107, 197, 1621, 105143, 405373, 2323367] }
+    # let(:attackable_twist_factors) { [11, 107, 197, 1621, 105143, 405373, 2323367] }
+    let(:attackable_twist_factors) { [11, 107, 197, 1621, 105143, 405373, 2323367, 1571528514013] }
     let(:attackable_product) { attackable_twist_factors.reduce{ |u,v| u*v } }
     let(:secret) { client.send(:secret) }
     let(:attacker) {
@@ -38,16 +39,14 @@ describe Chal60 do
     let(:expected_second_pass) {
       [secret % attackable_product, -secret % attackable_product].sort
     }
+    let(:secret_found) { attacker.secret }
     it do
       expect(attacker.first_pass).to eq(expected_first_pass)
-      attacker.instance_variable_set(:@first_pass, expected_first_pass) # HAX
+      # attacker.instance_variable_set(:@first_pass, expected_first_pass) # Bypass for performance sake
       # expect(attacker.second_pass).to eq(expected_second_pass)
       expect(attacker.second_pass).to include(expected_second_pass[0])
       expect(attacker.second_pass).to include(expected_second_pass[1])
-      # expect(attacker.secret).to eq(secret)
+      expect([secret, order-secret]).to include(secret_found)
     end
-
-    # Full hack
-    pending
   end
 end

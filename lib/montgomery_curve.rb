@@ -3,11 +3,15 @@ class MontgomeryCurve
   attr_reader :p, :a, :b
   def initialize(p, a, b)
     @p = p
-    @a = a
-    @b = b
+    @a = a % p
+    @b = b % p
     @binv = @b.invmod(@p)
     @third = 3.invmod(@p)
     @p_bitlen = @p.to_s(2).size
+
+    if @b == 0 or @b * (@a*@a - 4) % @p == 0
+      raise "Incorrect curve"
+    end
   end
 
   def to_twist
@@ -31,7 +35,9 @@ class MontgomeryCurve
         w.add(w_a, w_b)
       }
     }.uniq
-    w_cx.map{|w_c| from_weierstrass(w_c)[0] }
+    # a+b == -a-b
+    # a-b == b-a
+    candidates = w_cx.map{|w_c| from_weierstrass(w_c)[0] }.uniq
   end
 
   def cswap(x, y, c)
@@ -143,7 +149,6 @@ class MontgomeryCurve
     WeierstrassCurve.new(@p, a, b)
   end
 
-  # This seems backwards from what I've read
   def to_weierstrass(uv)
     if uv.is_a?(Array)
       u, v = uv
@@ -154,8 +159,8 @@ class MontgomeryCurve
       v, p_minus_v = calculate_v(u)
       raise "Point #{u} doesn't look valid for #{self}" unless v
     end
-    x = (@b*u + @a*@third) % @p
-    y = (v * @b) % @p
+    x = ((u + @a*@third)*@binv) % @p
+    y = (v * @binv) % @p
     [x, y]
   end
 
@@ -173,8 +178,8 @@ class MontgomeryCurve
   def from_weierstrass(xy)
     return [0, 1] if xy == :infinity
     x, y = xy
-    u = ((x - @a * @third) * @binv) % @p
-    v = (y * @binv) % @p
+    u = (x*@b - @a*@third) % @p
+    v = (y * @b) % @p
     [u, v]
   end
 
@@ -205,5 +210,18 @@ class MontgomeryCurve
 
   def ==(other)
     other.is_a?(self.class) and @p == other.p and @a == other.a and @b == other.b
+  end
+
+  def log_by_bsgs(base_point, target, order)
+    weierstrass_curve = associated_weierstrass_curve
+    bp1, bp2 = to_weierstrass_all(base_point)
+    t1, t2 = to_weierstrass_all(target)
+
+    # There's actually only 2 combinations from those 4 values, and they're +- of each other
+    k1 = weierstrass_curve.log_by_bsgs(bp1, t1, 0, order-1)
+    k2 = order - k1
+
+    raise "Math doesn't work" unless multiply(base_point, k2) == multiply(base_point, k1)
+    [k1, k2].sort
   end
 end

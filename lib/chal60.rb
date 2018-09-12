@@ -13,30 +13,30 @@ class Chal60
 
     def first_pass
       unless @first_pass
+        twist_curve = @curve.to_twist
         @first_pass = []
         # First pass, get stuff modulo small primes
         # Unfortunately every factor has two matches, k and tf-k
         #
-        # It's also really damn slow
-        # even with a bunch of hacks to speed it up
         # On Weierstrass curve it's easy to do O(sqrt(n)) baby step giant step this
+        point0 = @curve.random_twist_point
+        key0 = @client.receive(point0)
         @attackable_twist_factors.each do |tf|
-          puts "HACKING #{tf}"
-          point = @curve.random_twist_point_of_order(@twist_order, tf)
-          key = @client.receive(point)
-          found = @curve.each_multiple(point, tf-1){|x,i|
-            break i if x == key
-          }
-          raise "Math doesn't work" unless found
-          first_pass << [tf, [found, (tf-found)%tf].uniq]
+          # puts "HACKING #{tf}"
+          point = twist_curve.multiply(point0, @twist_order / tf)
+          key = twist_curve.multiply(key0, @twist_order / tf)
+          found1, found2 = twist_curve.log_by_bsgs(point, key, tf)
+          raise "Math doesn't work" unless found1 and found2
+          first_pass << [tf, [found1, found2].uniq]
         end
+        # puts "HAXED"
       end
       @first_pass
     end
 
     def second_pass_input
       @second_pass_input ||= begin
-        first_pass.reduce do |(q1,k1),(q2,k2)|
+        first_pass.reduce do |(q1,k1), (q2,k2)|
           q = q1*q2
           k = k1.product(k2).map{ |k| Integer.chinese_remainder(k, [q1,q2]) }
           [q, k]
@@ -44,6 +44,7 @@ class Chal60
       end
     end
 
+    # Second pass, reduce 2^N possible matches to just 4 (related to factor of 4 in twist order ???)
     def second_pass
       unless @second_pass
         q, ks = second_pass_input
@@ -51,15 +52,14 @@ class Chal60
         # Fortunately we can retry with narrower base
         #
         # It also looks like sometimes it just plain doesn't work, unclear why
-        100.times do
+        10.times do
           point = @curve.random_twist_point_of_order(@twist_order, q)
           key = @client.receive(point)
-          result = ks.select{ |k| @curve.ladder(point, k) == key }.sort
-          if result.size == 2
-            @second_pass = result
+          ks = ks.select{ |k| @curve.ladder(point, k) == key }.sort
+          if ks.size <= 4
+            break
           else
-            ks = result
-            # warn "#{result.size} results - #{result}"
+            warn "#{ks.size} results - #{ks}"
           end
         end
         @second_pass = ks
@@ -68,8 +68,16 @@ class Chal60
     end
 
     def secret
-      # Second pass, reduce 2^N possible matches to just 2
-      binding.pry
+      candidates = [0,1,2,3].flat_map{|i| second_pass.map{|x| x + i*@twist_order/4}}.uniq.sort
+
+      # Not using twist, using honest point now!
+      point = @curve.random_point
+      key = @client.receive(point)
+
+      result = candidates.find{|k| @curve.multiply(point, k) == key }
+      return result if result
+
+      raise "Attack failed"
     end
   end
 end
