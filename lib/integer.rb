@@ -1,4 +1,9 @@
 class Integer
+  def ceil_div(divisor)
+    raise unless divisor.is_a?(Integer) and divisor > 0
+    (self + divisor - 1) / divisor
+  end
+
   def count_bits
     raise if self < 0
     result = 0
