@@ -3,12 +3,16 @@ class Chal47
     def initialize(private_key)
       @private_key = private_key
       @nlen = Chal47.pad_len_for_key @private_key.n
+      @b = 256**(@nlen-2)
+      @ptmin = @b*2
+      @ptmax = @b*3-1
     end
 
     def call(ct)
       pt = @private_key.decrypt(ct)
-      pt_bin = ("%0#{@nlen*2}x"  % pt).from_hex
-      Chal47.somewhat_correct_padding?(pt_bin, @nlen)
+      pt >= @ptmin and pt <= @ptmax
+      # pt_bin = ("%0#{@nlen*2}x"  % pt).from_hex
+      # Chal47.somewhat_correct_padding?(pt_bin, @nlen)
     end
   end
 
@@ -33,6 +37,13 @@ class Chal47
     def increase_oracle_call_counter
       @tries += 1
       @total_tries += 1
+      # puts "T: #{@tries}" if @tries % 1000 == 0
+      # puts "TT: #{@total_tries}" if @total_tries % 1000 == 0
+    end
+
+    def oracle_call(msg)
+      increase_oracle_call_counter
+      @oracle.call(msg)
     end
 
     def call(message)
@@ -52,7 +63,7 @@ class Chal47
 
       while true
         possibilities = mi.map{|mn,mx| mx-mn+1}.sum
-        puts "TODO: #{possibilities} possibilities in #{mi.size} ranges"
+        # puts "TODO: #{possibilities} possibilities in #{mi.size} ranges"
 
         # Step 2: Searching for PKCS conforming messages.
         if i == 1
@@ -60,21 +71,19 @@ class Chal47
           min_s1 = @n.ceil_div(3*@b)
           reset_oracle_call_counter
           si = (min_s1..Float::INFINITY).find{|si_candidate|
-            increase_oracle_call_counter
             binding.pry if @tries > 100000 # Shouldn't be > 2**16 unless I'm confused
-            @oracle.call( (c0 * si_candidate.powmod(@e, @n)) % @n )
+            oracle_call( (c0 * si_candidate.powmod(@e, @n)) % @n )
           }
-          puts "Step 2a took #{@tries} Oracle calls"
+          # puts "Step 2a took #{@tries} Oracle calls"
         elsif mi.size > 1
           # Step 2.b: Searching with more than one interval left.
           min_si = si+1
           reset_oracle_call_counter
           si = (min_si..Float::INFINITY).find{|si_candidate|
-            increase_oracle_call_counter
             binding.pry if @tries > 100000 # Shouldn't be > 2**16 unless I'm confused
-            @oracle.call( (c0 * si_candidate.powmod(@e, @n)) % @n )
+            oracle_call( (c0 * si_candidate.powmod(@e, @n)) % @n )
           }
-          puts "Step 2b took #{@tries} Oracle calls"
+          # puts "Step 2b took #{@tries} Oracle calls"
         else
           # Step 2.c: Searching with one interval left.
           found_si = false
@@ -85,15 +94,14 @@ class Chal47
             min_si = (2*@b + ri*@n).ceil_div mx
             max_si = (3*@b + ri*@n) / mn
             (min_si..max_si).each do |si_candidate|
-              increase_oracle_call_counter
-              if @oracle.call( (c0 * si_candidate.powmod(@e, @n)) % @n )
+              if oracle_call( (c0 * si_candidate.powmod(@e, @n)) % @n )
                 si = si_candidate
                 found_si = true
               end
             end
             break if found_si
           end
-          puts "Step 3b took #{@tries} Oracle calls"
+          # puts "Step 3b took #{@tries} Oracle calls"
         end
 
         # Step 3: Narrowing the set of solutions.
