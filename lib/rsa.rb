@@ -5,17 +5,21 @@ module RSA
     end
 
     def sign(msg)
-      pad_message(msg).powmod(d, n)
+      pad_message_for_signing(msg).powmod(d, n)
     end
 
     def public_key
       PublicKey.new(n, e)
     end
 
-    def pad_message(msg)
+    def pad_message_for_signing(msg)
       hash = Digest::SHA1.hexdigest(msg)
       ffs = signature_size - hash.size/2 - 3
       ("0001" + "ff" * ffs + "00" + hash).to_i(16)
+    end
+
+    def decrypt(msg)
+      msg.powmod(d, n)
     end
   end
 
@@ -51,6 +55,10 @@ module RSA
       return false unless decoded.shift == 0
       hash = Digest::SHA1.hexdigest(msg)
       hash == decoded.pack("C*").to_hex[0,40]
+    end
+
+    def encrypt(msg)
+      msg.powmod(e, n)
     end
   end
 

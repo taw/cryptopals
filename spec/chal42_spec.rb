@@ -20,8 +20,8 @@ describe Chal42 do
       end
 
       it "pads message correctly" do
-        expect(private_key1.pad_message(msg1).to_s(16)).to eq("1ffffffffffffffffffffffffffffffffffffffffffffffffff00943a702d06f34599aee1f8da8ef9f7296031d699")
-        expect(private_key2.pad_message(msg1).to_s(16)).to eq("1ffffffffffffffffff00943a702d06f34599aee1f8da8ef9f7296031d699")
+        expect(private_key1.pad_message_for_signing(msg1).to_s(16)).to eq("1ffffffffffffffffffffffffffffffffffffffffffffffffff00943a702d06f34599aee1f8da8ef9f7296031d699")
+        expect(private_key2.pad_message_for_signing(msg1).to_s(16)).to eq("1ffffffffffffffffff00943a702d06f34599aee1f8da8ef9f7296031d699")
       end
 
       it "signatures are deterministic" do

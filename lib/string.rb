@@ -1,4 +1,8 @@
 class String
+  def to_i_binary
+    to_hex.to_i(16)
+  end
+
   def from_hex
     [self].pack("H*")
   end
