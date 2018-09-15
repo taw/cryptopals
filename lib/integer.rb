@@ -1,4 +1,9 @@
 class Integer
+  # ruby builtin prime? is ridiculously slow
+  def fast_prime?
+    OpenSSL::BN.new(self).prime?
+  end
+
   def ceil_div(divisor)
     raise unless divisor.is_a?(Integer) and divisor > 0
     (self + divisor - 1) / divisor

@@ -63,7 +63,36 @@ describe Chal61 do
     end
   end
 
-
   # RSA hack
+  describe "generate_smooth_prime" do
+    let(:bits) { 256 }
+    let(:factors) { Prime.take(1000) }
+    let(:prime) { chal.generate_smooth_prime(factors, bits) }
+    let(:smooth_factors) { (prime-1).prime_division.map(&:first) }
+
+    it do
+      expect(prime).to be_fast_prime
+      expect(smooth_factors.all?{|x| x < 10_000}).to be true
+    end
+  end
+
+  describe "generate_pair_of_smooth_primes" do
+    let(:bits) { 256 }
+    let(:factors) { Prime.take(1001).drop(1) }
+    let(:pq) { chal.generate_pair_of_smooth_primes(bits) }
+    let(:p) { pq[0] }
+    let(:q) { pq[1] }
+    let(:p_smooth_factors) { (p-1).prime_division.map(&:first) }
+    let(:q_smooth_factors) { (q-1).prime_division.map(&:first) }
+
+    it do
+      expect(p).to be_fast_prime
+      expect(q).to be_fast_prime
+      expect(p_smooth_factors.all?{|x| x < 20_000}).to be true
+      expect(q_smooth_factors.all?{|x| x < 20_000}).to be true
+      expect(p_smooth_factors & q_smooth_factors).to eq([2])
+    end
+  end
+
   pending
 end

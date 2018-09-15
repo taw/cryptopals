@@ -27,4 +27,31 @@ class Chal61
 
     [new_private_key, new_signature]
   end
+
+  def generate_smooth_prime(factors, bitsize)
+    min_prime = 2 ** (bitsize-1)
+    # tries = 0
+    while true
+      p1 = 2
+      while p1 < min_prime
+        p1 *= factors.sample
+      end
+      # tries += 1
+      if (p1+1).fast_prime?
+        # puts "Found in #{tries} tries"
+        return (p1+1)
+      end
+      # if tries % 10000 == 0
+      #   puts "#{tries} tries"
+      # end
+    end
+  end
+
+  def generate_pair_of_smooth_primes(bitsize)
+    p_factors, q_factors = Prime.take(2001).drop(1).each_slice(2).to_a.transpose
+    [
+      generate_smooth_prime(p_factors, bitsize),
+      generate_smooth_prime(q_factors, bitsize),
+    ]
+  end
 end
