@@ -24,8 +24,15 @@ module RSA
   end
 
   class PublicKey < Struct.new(:n, :e)
+    # These two methods are for both keys
     def signature_size
       n.to_s(2).size / 8
+    end
+
+    def pad_message_for_signing(msg)
+      hash = Digest::SHA1.hexdigest(msg)
+      ffs = signature_size - hash.size/2 - 3
+      ("0001" + "ff" * ffs + "00" + hash).to_i(16)
     end
 
     def valid?(signature, msg)

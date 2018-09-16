@@ -28,13 +28,19 @@ class Chal61
     [new_private_key, new_signature]
   end
 
+  # Avoid duplicates as they make the rest of he code code more complicated
   def generate_smooth_prime(factors, bitsize)
+    factors -= [2] # Just to be sure
     min_prime = 2 ** (bitsize-1)
     # tries = 0
     while true
       p1 = 2
+      seen_factors = Set[]
+
       while p1 < min_prime
-        p1 *= factors.sample
+        u = factors.sample
+        next if seen_factors.include?(u)
+        p1 *= u
       end
       # tries += 1
       if (p1+1).fast_prime?
@@ -53,5 +59,13 @@ class Chal61
       generate_smooth_prime(p_factors, bitsize),
       generate_smooth_prime(q_factors, bitsize),
     ]
+  end
+
+  def create_fake_rsa_signature_key(signature, msg, public_key)
+    padded_message = public_key.pad_message_for_signing(msg)
+    bitsize = public_key.signature_size * 8 / 2
+    p, q = generate_pair_of_smooth_primes(bitsize)
+    p1factors = (p-1).prime_division.map(&:first)
+    q1factors = (q-1).prime_division.map(&:first)
   end
 end

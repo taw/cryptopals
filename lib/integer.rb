@@ -133,4 +133,16 @@ class Integer
     series = remainders.zip(mods).map{ |r,m| (r * max * (max/m).invmod(m) / m) }
     series.reduce(:+) % max
   end
+
+  def discrete_log_by_brute_force(base, prime, max=prime-1)
+    target = self % prime
+    base = base % prime
+    x = 1
+    (0..max).each do |i|
+      return i if x == self
+      x = (x * base) % prime
+    end
+    # raise "Math doesn't work"
+    nil
+  end
 end
