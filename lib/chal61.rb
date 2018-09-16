@@ -64,8 +64,29 @@ class Chal61
   def create_fake_rsa_signature_key(signature, msg, public_key)
     padded_message = public_key.pad_message_for_signing(msg)
     bitsize = public_key.signature_size * 8 / 2
-    p, q = generate_pair_of_smooth_primes(bitsize)
-    p1factors = (p-1).prime_division.map(&:first)
-    q1factors = (q-1).prime_division.map(&:first)
+    signature_size = public_key.signature_size
+    tries = 0
+    while true
+      tries += 1
+      p, q = generate_pair_of_smooth_primes(bitsize)
+      p1factors = (p-1).prime_division
+      q1factors = (q-1).prime_division
+      n = p*q
+      next if n.to_s(2).size / 8 > signature_size
+
+      ep = padded_message.discrete_log_pohe(signature, p, p1factors)
+      eq = padded_message.discrete_log_pohe(signature, q, q1factors)
+      next unless ep
+      next unless eq
+
+      e = Integer.generalized_chinese_remainder([ep,eq],[p-1,q-1])
+      next unless e
+      d = e.invmod((p-1)*(q-1)) rescue next
+
+      # puts "Took: #{tries} tries"
+      hacked_private_key = RSA::PrivateKey.new(n, e, d)
+      raise unless hacked_private_key.public_key.valid?(signature, msg)
+      return hacked_private_key
+    end
   end
 end

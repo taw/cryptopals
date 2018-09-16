@@ -133,6 +133,30 @@ class Integer
     end
   end
 
+  def self.generalized_chinese_remainder(remainders, mods)
+    pairs = remainders.zip(mods)
+    while pairs.size > 1
+      r1,p1 = pairs.shift
+      r2,p2 = pairs.shift
+      g = p1.gcd(p2)
+      if g == 1
+        p3 = p1*p2
+        r3 = chinese_remainder([r1,r2], [p1,p2])
+      else
+        if r1%g == r2%g
+          p2z = p2/g
+          r2z = r2%p2z
+          p3 = p1*p2z
+          r3 = chinese_remainder([r1,r2z], [p1,p2z])
+        else
+          return nil
+        end
+      end
+      pairs.unshift([r3,p3])
+    end
+    pairs[0][0]
+  end
+
   def self.chinese_remainder(remainders, mods)
     max = mods.reduce(:*)
     series = remainders.zip(mods).map{ |r,m| (r * max * (max/m).invmod(m) / m) }
@@ -199,10 +223,11 @@ class Integer
           shiftexp = (prime-1) / (pi ** (k + 1))
           tmp_power = base_inv.powmod(shiftexp*xi, prime)
           zpower = (target.powmod(shiftexp, prime) * tmp_power) % prime
-          lk = zpower.discrete_log_bsgs(gi, prime, pi-1)
+          lk = zpower.discrete_log_bsgs(gi, prime, pi-1) or return nil
           xi += lk * (pi ** k)
         end
       end
+      return nil unless xi
       remainders << xi
       mods << pi_ei
     end

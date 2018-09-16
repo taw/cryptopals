@@ -102,17 +102,22 @@ describe Chal61 do
       let(:padded_message) { public_key.pad_message_for_signing(msg) }
 
       it do
-        p private_key
-
         hacked_private_key = chal.create_fake_rsa_signature_key(signature, msg, public_key)
-        # It is valid
+
+        e = hacked_private_key.e
+        n = hacked_private_key.n
+        d = hacked_private_key.d
+        s = signature
+        m = padded_message
+
+        s2 = m.powmod(d, n)
+        m2 = s.powmod(e, n)
+
         expect(private_key.public_key.valid?(signature, msg)).to be true
         expect(hacked_private_key.public_key.valid?(signature, msg)).to be true
         expect(hacked_private_key.public_key).to_not eq(private_key.public_key)
-        expect(hacked_private_key.decode(signature)).to eq(padded_message)
+        expect(hacked_private_key.decrypt(padded_message)).to eq(signature)
       end
-
-      pending
     end
   end
 end
