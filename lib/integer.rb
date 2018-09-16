@@ -66,6 +66,16 @@ class Integer
     x % et
   end
 
+  def root(n)
+    raise "Can't integer root negative number" if n < 0
+    (0..self).bsearch{|i| self - i**n }
+  end
+
+  def root_ceil(n)
+    raise "Can't integer root negative number" if n < 0
+    (0..self).bsearch{|i| i**n >= self }
+  end
+
   # https://rosettacode.org/wiki/Tonelli-Shanks_algorithm
   def legendre(p)
     self.powmod((p - 1) / 2, p)
@@ -123,20 +133,16 @@ class Integer
     end
   end
 
-  def root(n)
-    raise "Can't integer root negative number" if n < 0
-    (0..self).bsearch{|i| self - i**n }
-  end
-
   def self.chinese_remainder(remainders, mods)
     max = mods.reduce(:*)
     series = remainders.zip(mods).map{ |r,m| (r * max * (max/m).invmod(m) / m) }
     series.reduce(:+) % max
   end
 
-  def discrete_log_by_brute_force(base, prime, max=prime-1)
+  def discrete_log_linear(base, prime)
     target = self % prime
     base = base % prime
+    max = prime - 1
     x = 1
     (0..max).each do |i|
       return i if x == self
@@ -144,5 +150,62 @@ class Integer
     end
     # raise "Math doesn't work"
     nil
+  end
+
+  def discrete_log_bsgs(base, prime, max=prime-1)
+    target = self % prime
+    base = base % prime
+    min = 0
+    range_size = max-min+1
+    s = Math.sqrt(range_size).round
+    z = (range_size + s - 1) / s
+    raise unless s*z >= range_size
+    ht = {}
+    gi = base.powmod(min, prime)
+    s.times do |i|
+      ht[gi] = min+i
+      gi = (gi * base) % prime
+    end
+    gms = base.invmod(prime).powmod(s, prime)
+    gj = target
+    z.times do |j|
+      if ht[gj]
+        return ht[gj] + s * j
+      end
+      gj = (gj * gms) % prime
+    end
+    # raise "Math doesn't work"
+    nil
+  end
+
+  def discrete_log_pohe(base, prime, factors)
+    target = self % prime
+    base = base % prime
+
+    remainders = []
+    mods = []
+    factors.each do |pi, ei|
+      pi_ei = pi**ei
+      expi = (prime-1)/pi
+      raise unless (prime-1) % pi == 0
+      gi = base.powmod(expi, prime)
+      if ei == 1
+        hi = target.powmod(expi, prime)
+        xi = hi.discrete_log_bsgs(gi, prime, pi-1)
+      else
+        xi = 0
+        base_inv = base.invmod(prime)
+        ei.times do |k|
+          shiftexp = (prime-1) / (pi ** (k + 1))
+          tmp_power = base_inv.powmod(shiftexp*xi, prime)
+          zpower = (target.powmod(shiftexp, prime) * tmp_power) % prime
+          lk = zpower.discrete_log_bsgs(gi, prime, pi-1)
+          xi += lk * (pi ** k)
+        end
+      end
+      remainders << xi
+      mods << pi_ei
+    end
+    Integer.chinese_remainder(remainders, mods)
   end
 end
