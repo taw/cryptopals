@@ -1,5 +1,16 @@
 class Chal55
   class IntrospectiveMD4
+    ROTATIONS = [
+      3,7,11,19, 3,7,11,19, 3,7,11,19, 3,7,11,19,
+      3,5,9,13, 3,5,9,13, 3,5,9,13, 3,5,9,13,
+      3,9,11,15, 3,9,11,15, 3,9,11,15, 3,9,11,15,
+    ]
+    SCHEDULE = [
+      0,1,2,3, 4,5,6,7, 8,9,10,11, 12,13,14,15,
+      0,4,8,12, 1,5,9,13, 2,6,10,14, 3,7,11,15,
+      0,8,4,12, 2,10,6,14, 1,9,5,13, 3,11,7,15,
+    ]
+
     class << self
       def padding(message)
         byte_size = message.bytesize
@@ -24,20 +35,9 @@ class Chal55
         a, b, c, d = state
         aa, bb, cc, dd = a, b, c, d
 
-        rotations = [
-          3,7,11,19, 3,7,11,19, 3,7,11,19, 3,7,11,19,
-          3,5,9,13, 3,5,9,13, 3,5,9,13, 3,5,9,13,
-          3,9,11,15, 3,9,11,15, 3,9,11,15, 3,9,11,15,
-        ]
-        schedule = [
-          0,1,2,3, 4,5,6,7, 8,9,10,11, 12,13,14,15,
-          0,4,8,12, 1,5,9,13, 2,6,10,14, 3,7,11,15,
-          0,8,4,12, 2,10,6,14, 1,9,5,13, 3,11,7,15,
-        ]
-
         48.times do |j|
-          xi = x[schedule[j]]
-          ri = rotations[j]
+          xi = x[SCHEDULE[j]]
+          ri = ROTATIONS[j]
           if j <= 15
             u = b & c | (b ^ mask) & d
             k = 0
@@ -118,11 +118,40 @@ class Chal55
     [[:z, 18], [:e, 25], [:o, 26], [:o, 28], [:z, 29], [:e, 31]],
   ]
 
+  def self.verify_round1_conditions(message)
+    initial_state = Chal55::IntrospectiveMD4.initial_state
+    digest, intermediate = Chal55::IntrospectiveMD4.reduce(initial_state, message)
+    fails = 0
+    CONDITIONS.each_with_index do |conds, index|
+      if index == 0
+        # not even 100% sure actually
+        prev = initial_state[1]
+      else
+        prev = intermediate[index-1]
+      end
+      current = intermediate[index]
+      conds.each do |type, bit_ofs|
+        ok = case type
+        when :z
+          current[bit_ofs] == 0
+        when :o
+          current[bit_ofs] == 1
+        when :e
+          current[bit_ofs] == prev[bit_ofs]
+        end
+        p [index, ok, type, current[bit_ofs], prev[bit_ofs]]
+        fails += 1 unless ok
+      end
+    end
+    fails == 0
+  end
+
   def self.generate_candidate_pair
     v1 = 16.times.map{ rand(2**32) }
 
     # Round 1
-
+    CONDITIONS.each_with_index do |conds, index|
+    end
 
     # Generate pair with proper difference
     v2 = [*v1]

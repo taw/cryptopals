@@ -61,6 +61,13 @@ describe Chal55 do
         expect(m1diff[:intermediate_diffs]).to eq(m2diff[:intermediate_diffs])
       end
     end
+
+    it "verify_round1_conditions" do
+      expect(Chal55.verify_round1_conditions(m1a)).to eq true
+      expect(Chal55.verify_round1_conditions(m1b)).to eq false
+      expect(Chal55.verify_round1_conditions(m2a)).to eq true
+      expect(Chal55.verify_round1_conditions(m2b)).to eq false
+    end
   end
 
   describe "#generate_candidate_pair" do
@@ -69,6 +76,8 @@ describe Chal55 do
       diff = Chal55::IntrospectiveMD4.diff(m1, m2)
       expect(diff[:message_diffs]).to eq([0, 2**31, 2**31 - 2**28, 0, 0, 0, 0, 0, 0, 0, 0, 0, -2**16, 0, 0, 0])
       p diff[:intermediate_diffs]
+
+      # Chal55.verify_round1_conditions(m1)
     end
   end
 
