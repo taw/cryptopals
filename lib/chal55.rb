@@ -93,4 +93,21 @@ class Chal55
       end
     end
   end
+
+  def self.generate_candidate_pair
+    v1 = 16.times.map{ rand(2**32) }
+    v2 = [*v1]
+
+    # Make sure
+    v2[1] |= (2**31)
+    v1[1] &= ~(2**31)
+    v1[2] |= (2**31 + 2**28)
+    v2[2] &= ~(2**31 + 2**28)
+    v1[12] |= (2**16)
+    v2[12] &= ~(2**16)
+    [
+      v1.pack("V*"),
+      v2.pack("V*"),
+    ]
+  end
 end

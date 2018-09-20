@@ -62,5 +62,13 @@ describe Chal55 do
     end
   end
 
+  describe "#generate_candidate_pair" do
+    it do
+      m1, m2 = Chal55.generate_candidate_pair
+      diff = Chal55::IntrospectiveMD4.diff(m1, m2)
+      expect(diff[:message_diffs]).to eq([0, -2**31, 2**31 + 2**28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2**16, 0, 0, 0])
+    end
+  end
+
   pending
 end
