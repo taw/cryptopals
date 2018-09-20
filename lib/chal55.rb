@@ -12,6 +12,10 @@ class Chal55
         (v << s).&(mask) | (v.&(mask) >> (32 - s))
       end
 
+      def rotate_right(v, s)
+        rotate_left(v, 32-s)
+      end
+
       def reduce(state, chunk)
         x = chunk.unpack("V*")
         intermediate_values = []
@@ -122,14 +126,12 @@ class Chal55
 
     # Generate pair with proper difference
     v2 = [*v1]
-    v2[1]  |=  (2**31)
-    v1[1]  &= ~(2**31)
-    v1[2]  &= ~(2**31)
-    v1[2]  |=  (2**28)
-    v2[2]  |=  (2**31)
-    v2[2]  &= ~(2**28)
-    v1[12] |=  (2**16)
-    v2[12] &= ~(2**16)
+    v2[1]  = v2[1].set_bit(31)
+    v1[1]  = v2[1].clear_bit(31)
+    v1[2]  = v1[2].clear_bit(31).set_bit(28)
+    v2[2]  = v2[2].set_bit(31).clear_bit(28)
+    v1[12] = v1[12].set_bit(16)
+    v2[12] = v2[12].clear_bit(16)
     [
       v1.pack("V*"),
       v2.pack("V*"),

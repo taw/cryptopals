@@ -20,6 +20,22 @@ class Integer
     result
   end
 
+  def set_bit(i)
+    self | (1 << i)
+  end
+
+  def clear_bit(i)
+    self & ~(1 << i)
+  end
+
+  def copy_bit(source, i)
+    if source[i] == 1
+      set_bit(i)
+    else
+      clear_bit(i)
+    end
+  end
+
   def to_s_binary
     i = self
     out = []
