@@ -77,6 +77,13 @@ describe Chal55 do
       expect(diff[:message_diffs]).to eq([0, 2**31, 2**31 - 2**28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2**32 - 2**16, 0, 0, 0])
       expect(Chal55.verify_round1_conditions(m1)).to eq true
       expect(Chal55.verify_round1_conditions(m2)).to eq false
+
+      # t0 = Time.now
+      # 20_000.times {
+      #   Chal55.generate_candidate_pair
+      # }
+      # dt = Time.now-t0
+      # p [:took, dt]
     end
   end
 

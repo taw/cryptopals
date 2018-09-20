@@ -157,30 +157,25 @@ class Chal55
     initial_state = Chal55::IntrospectiveMD4.initial_state
 
     v1 = 16.times.map{ rand(2**32) }
-    v1[1]  = v1[1].clear_bit(31)
-    v1[2]  = v1[2].clear_bit(31).set_bit(28)
-    v1[12] = v1[12].set_bit(16)
 
     # Round 1
+    states = [
+      initial_state[0],
+      initial_state[3],
+      initial_state[2],
+      initial_state[1],
+    ]
     CONDITIONS.each_with_index do |conds, index|
+      xi = v1[index]
+      ri = ROTATIONS[index]
+      a = states[index]
+      b = states[index+3]
+      c = states[index+2]
+      d = states[index+1]
+      prev = states[-1]
+      u = b & c | (b ^ MASK) & d
+      current = t = rotate_left(a + u + xi, ri)
       conds.each do |type, bit_ofs|
-        digest, intermediate = Chal55::IntrospectiveMD4.reduce(initial_state, v1.pack("V*"))
-
-        states = [
-          initial_state[0],
-          initial_state[3],
-          initial_state[2],
-          initial_state[1],
-          *intermediate,
-        ]
-
-        if index == 0
-          # not even 100% sure actually
-          prev = initial_state[1]
-        else
-          prev = intermediate[index-1]
-        end
-        current = intermediate[index]
         ok = case type
         when :z
           current[bit_ofs] == 0
@@ -190,26 +185,12 @@ class Chal55
           current[bit_ofs] == prev[bit_ofs]
         end
         unless ok
-          xi = v1[index]
-          ri = ROTATIONS[index]
-          a = states[index]
-          b = states[index+3]
-          c = states[index+2]
-          d = states[index+1]
-          tx = states[index+4]
-
-          u = b & c | (b ^ MASK) & d
-
-          t = rotate_left(a + u + xi, ri)
-          raise unless t == tx
-
-          fixed_t = t ^ (1 << bit_ofs)
-
-          fixed_xi = rotate_right(fixed_t, ri) - a - u
-
+          t ^= (1 << bit_ofs)
+          fixed_xi = rotate_right(t, ri) - a - u
           v1[index] = fixed_xi & MASK
         end
       end
+      states << t
     end
 
     # Generate pair with proper difference
