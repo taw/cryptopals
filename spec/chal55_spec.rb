@@ -55,8 +55,9 @@ describe Chal55 do
       let(:m2diff) { Chal55::IntrospectiveMD4.diff(m2a, m2b) }
 
       it do
-        expect(m1diff[:message_diffs]).to eq([0, -2**31, 2**31 + 2**28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2**16, 0, 0, 0])
-        expect(m2diff[:message_diffs]).to eq([0, -2**31, 2**31 + 2**28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2**16, 0, 0, 0])
+        # Diffs don't seem quite what the paper shows due to mod 2**32 arithmetic
+        expect(m1diff[:message_diffs]).to eq([0, 2**31, -2**32 + 2**31 - 2**28, 0, 0, 0, 0, 0, 0, 0, 0, 0, -2**16, 0, 0, 0])
+        expect(m2diff[:message_diffs]).to eq([0, 2**31, -2**32 + 2**31 - 2**28, 0, 0, 0, 0, 0, 0, 0, 0, 0, -2**16, 0, 0, 0])
         expect(m1diff[:intermediate_diffs]).to eq(m2diff[:intermediate_diffs])
       end
     end
@@ -66,7 +67,8 @@ describe Chal55 do
     it do
       m1, m2 = Chal55.generate_candidate_pair
       diff = Chal55::IntrospectiveMD4.diff(m1, m2)
-      expect(diff[:message_diffs]).to eq([0, -2**31, 2**31 + 2**28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2**16, 0, 0, 0])
+      expect(diff[:message_diffs]).to eq([0, 2**31, 2**31 - 2**28, 0, 0, 0, 0, 0, 0, 0, 0, 0, -2**16, 0, 0, 0])
+      p diff[:intermediate_diffs]
     end
   end
 
