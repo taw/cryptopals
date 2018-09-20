@@ -1,0 +1,34 @@
+describe Chal55 do
+  describe "Examples from Wang paper" do
+    let(:m1a) { %W[
+      4d7a9c83 56cb927a b9d5a578 57a7a5ee de748a3c dcc366b3 b683a020 3b2a5d9f
+      c69d71b3 f9e99198 d79f805e a63bb2e8 45dd8e31 97e31fe5 2794bf08 b9e8c3e9
+    ].map{ |x| x.to_i(16) }.pack("V*") }
+    let(:m1b) { %W[
+      4d7a9c83 d6cb927a 29d5a578 57a7a5ee de748a3c dcc366b3 b683a020 3b2a5d9f
+      c69d71b3 f9e99198 d79f805e a63bb2e8 45dc8e31 97e31fe5 2794bf08 b9e8c3e9
+    ].map{ |x| x.to_i(16) }.pack("V*") }
+    let(:m2a) { %W[
+      4d7a9c83 56cb927a b9d5a578 57a7a5ee de748a3c dcc366b3 b683a020 3b2a5d9f
+      c69d71b3 f9e99198 d79f805e a63bb2e8 45dd8e31 97e31fe5 f713c240 a7b8cf69
+    ].map{ |x| x.to_i(16) }.pack("V*") }
+    let(:m2b) { %W[
+      4d7a9c83 d6cb927a 29d5a578 57a7a5ee de748a3c dcc366b3 b683a020 3b2a5d9f
+      c69d71b3 f9e99198 d79f805e a63bb2e8 45dc8e31 97e31fe5 f713c240 a7b8cf69
+    ].map{ |x| x.to_i(16) }.pack("V*") }
+
+    let(:h1a) { OpenSSL::Digest::MD4.hexdigest(m1a) }
+    let(:h1b) { OpenSSL::Digest::MD4.hexdigest(m1b) }
+    let(:h2a) { OpenSSL::Digest::MD4.hexdigest(m2a) }
+    let(:h2b) { OpenSSL::Digest::MD4.hexdigest(m2b) }
+
+    it do
+      expect(m1a).to_not eq(m1b)
+      expect(h1a).to eq(h1b)
+      expect(m2a).to_not eq(m2b)
+      expect(h2a).to eq(h2b)
+    end
+  end
+
+  pending
+end
