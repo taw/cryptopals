@@ -77,15 +77,21 @@ describe Chal55 do
       expect(diff[:message_diffs]).to eq([0, 2**31, 2**31 - 2**28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2**32 - 2**16, 0, 0, 0])
       expect(Chal55.verify_round1_conditions(m1)).to eq true
       expect(Chal55.verify_round1_conditions(m2)).to eq false
-
-      # t0 = Time.now
-      # 20_000.times {
-      #   Chal55.generate_candidate_pair
-      # }
-      # dt = Time.now-t0
-      # p [:took, dt]
     end
   end
 
-  pending
+  # That takes like 30 mins for round1 only attack
+  # (would be faster with round2 logic or in C)
+  # so just save some values foud before
+  it "attack" do
+    m1 = "b54407989d3ead2e3482c2b89ceade3b67d9811cc589cb44aacafae7f698f74c6551c30bf8e16302b74d0af1018ea4961dbce8bdb32301aa3dae4936621b766d".from_hex
+    m2 = "b54407989d3eadae3482c2289ceade3b67d9811cc589cb44aacafae7f698f74c6551c30bf8e16302b74d0af1018ea4961dbce7bdb32301aa3dae4936621b766d".from_hex
+    # m1, m2 = Chal55.attack
+    expect(m1).to_not eq(m2)
+    h1 = OpenSSL::Digest::MD4.hexdigest(m1)
+    h2 = OpenSSL::Digest::MD4.hexdigest(m2)
+    # puts m1.to_hex
+    # puts m2.to_hex
+    expect(h1).to eq(h2)
+  end
 end

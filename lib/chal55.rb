@@ -203,4 +203,17 @@ class Chal55
       v2.pack("V*"),
     ]
   end
+
+  def self.attack
+    i = 0
+    while true
+      i += 1
+      m1, m2 = generate_candidate_pair
+      h1 = OpenSSL::Digest::MD4.hexdigest(m1)
+      h2 = OpenSSL::Digest::MD4.hexdigest(m2)
+      puts "#{i} tries"  if i % 100_000 == 0
+      break if h1 == h2
+    end
+    [m1, m2]
+  end
 end
