@@ -37,7 +37,7 @@ describe Chal60 do
     }
     let(:expected_first_pass) { attackable_twist_factors.map{ |k| [k, [secret % k, -secret % k].uniq.sort] } }
     let(:expected_second_pass) {
-      [secret % attackable_product, -secret % attackable_product].sort
+      [secret % attackable_product, -secret % attackable_product].sort.uniq
     }
     let(:secret_found) { attacker.secret }
     it do
