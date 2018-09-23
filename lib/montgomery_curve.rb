@@ -219,9 +219,9 @@ class MontgomeryCurve
 
     # There's actually only 2 combinations from those 4 values, and they're +- of each other
     k1 = weierstrass_curve.log_by_bsgs(bp1, t1, 0, order-1)
-    k2 = order - k1
+    k2 = -k1 % order
 
     raise "Math doesn't work" unless multiply(base_point, k2) == multiply(base_point, k1)
-    [k1, k2].sort
+    [k1, k2].sort.uniq
   end
 end
