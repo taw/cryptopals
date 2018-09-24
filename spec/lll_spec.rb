@@ -86,4 +86,18 @@ describe LLL do
       expect(LLL.reduce(b)).to eq(expected)
     end
   end
+
+  # n=12 -> 10s
+  describe "performance" do
+    it do
+      n = 12
+      x = 10**12
+      b = n.times.map{ n.times.map{ rand(-x..x) } }
+      t = Time.now
+      q = LLL.reduce(b)
+      p Time.now-t
+      p b
+      p q
+    end
+  end
 end

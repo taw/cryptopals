@@ -82,5 +82,3 @@ module LLL
     end
   end
 end
-
-
