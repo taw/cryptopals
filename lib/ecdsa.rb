@@ -32,7 +32,7 @@ module ECDSA
       g = group.g
       n = group.n
       d = rand(2...n)
-      PrivateKey.new(group, curve.multiply(g, d), d)
+      new(group, curve.multiply(g, d), d)
     end
   end
 
