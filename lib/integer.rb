@@ -82,6 +82,10 @@ class Integer
     x % et
   end
 
+  def divide_modulo(divisor, mod)
+    (self * divisor.invmod(mod)) % mod
+  end
+
   def root(n)
     raise "Can't integer root negative number" if n < 0
     (0..self).bsearch{|i| self - i**n }
