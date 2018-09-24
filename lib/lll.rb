@@ -37,7 +37,50 @@ module LLL
     end
 
     def reduce(b, delta=0.99)
-      raise "TODO"
+      b = b.map(&:dup)
+      q = gramschmidt(b)
+      mu = proc do |i,j|
+        v = b[i]
+        u = q[j]
+        vu = dot(v,u)
+        uu = dot(u,u)
+        if uu == 0
+          0
+        else
+          Rational(vu, uu)
+        end
+      end
+
+      n = b.size
+      k = 1
+
+      while k < n
+        (k-1).downto(0) do |j|
+          if mu[k,j].abs > Rational(1,2)
+            bk = b[k]
+            bj = b[j]
+            z = mu[k,j].round
+            n.times do |v|
+              bk[v] = bk[v] - z*bj[v]
+            end
+            q = gramschmidt(b)
+          end
+        end
+
+        qkp2 = dot(q[k-1], q[k-1])
+        qk2 = dot(q[k], q[k])
+
+        if qk2 >= (delta - mu[k, k-1]**2) * qkp2
+          k += 1
+        else
+          b[k], b[k-1] = b[k-1], b[k]
+          q = gramschmidt(b)
+          k = [k-1, 1].max
+        end
+      end
+      b
     end
   end
 end
+
+

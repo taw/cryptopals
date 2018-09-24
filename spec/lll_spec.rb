@@ -68,7 +68,22 @@ describe LLL do
     end
   end
 
-  # describe "reduce"
+  describe "reduce" do
+    let(:b) { [
+      [  -2r,    0r,    2r,    0r],
+      [ 1/2r,   -1r,    0r,    0r],
+      [  -1r,    0r,   -2r,  1/2r],
+      [  -1r,    1r,    1r,    2r],
+    ] }
+    let(:expected) { [
+      [ 1/2r,   -1r,    0r,    0r],
+      [  -1r,    0r,   -2r,  1/2r],
+      [-1/2r,    0r,    1r,    2r],
+      [-3/2r,   -1r,    2r,    0r],
+    ] }
 
-  pending
+    it do
+      expect(LLL.reduce(b)).to eq(expected)
+    end
+  end
 end
