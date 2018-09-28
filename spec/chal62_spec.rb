@@ -71,6 +71,32 @@ describe Chal62 do
     end
   end
 
-  # attack
-  pending
+  describe "#uts_to_lll_matrix" do
+    let(:q) { base_point_order }
+    let(:us) { [1,2,3,4] }
+    let(:ts) { [5,6,7,8] }
+    let(:matrix) { attacker.uts_to_lll_matrix(q, us, ts) }
+
+    it do
+      expect(matrix).to eq([
+        [q, 0, 0, 0, 0, 0],
+        [0, q, 0, 0, 0, 0],
+        [0, 0, q, 0, 0, 0],
+        [0, 0, 0, q, 0, 0],
+        [5, 6, 7, 8, (1/256r), 0],
+        [1, 2, 3, 4, 0, (q/256r)],
+      ])
+    end
+  end
+
+  # It's not guaranteed to work
+  # If I had faster LLL and more samples I'd probably have higher success rate
+  # Even with 20 it's already painfully slow
+  describe "#attack" do
+    let(:count) { 20 }
+    it do
+      d = attacker.attack(count)
+      expect(d).to eq(private_key.d)
+    end
+  end
 end

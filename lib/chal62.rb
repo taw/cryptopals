@@ -21,21 +21,28 @@ class Chal62
     def call
       @private_key.sign(random_message)
     end
+
+    def public_key
+      @private_key.public_key
+    end
   end
 
   class Attacker
-    def initialize(box)
+    attr_reader :l, :pl, :q
+
+    def initialize(box, l=8)
       @box = box
+      @l = 8
+      @pl = 2**@l
+      @q = box.public_key.group.n
     end
 
     def signature_to_ut(signature)
-      l = 8
-      q = signature.group.n
       s = signature.s
       r = signature.r
       h = signature.h
 
-      s2l = (s * (2**l)) % q
+      s2l = (s * pl) % q
       t = r.divide_modulo(s2l, q)
       u = h.divide_modulo(-s2l, q)
       [u, t]
@@ -46,6 +53,40 @@ class Chal62
         signature = @box.call
         [signature, *signature_to_ut(signature)]
       }
+    end
+
+    def uts_to_lll_matrix(q, us, ts)
+      ct = Rational(1, pl)
+      cu = Rational(q, pl)
+      count = us.size
+      matrix = count.times.map{ [0] * (count + 2) }
+      matrix << [*ts, ct, 0]
+      matrix << [*us, 0, cu]
+      count.times do |i|
+        matrix[i][i] = q
+      end
+      matrix
+    end
+
+    def prepare_lll_input(count)
+      pairs = collect_ut_pairs(count)
+      q = pairs[0][0].group.n
+      us = pairs.map{|row| row[1] }
+      ts = pairs.map{|row| row[2] }
+      uts_to_lll_matrix(q, us, ts)
+    end
+
+    def lll_result(count)
+      LLL.reduce(prepare_lll_input(count))
+    end
+
+    def attack(count)
+      result = lll_result(count)
+      target = Rational(q, pl)
+      matching_row = result.find{|row| row[-1] == target}
+      if matching_row
+        (matching_row[-2] * -pl).round
+      end
     end
   end
 end

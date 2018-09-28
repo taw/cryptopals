@@ -96,7 +96,7 @@ describe LLL do
       b = n.times.map{ n.times.map{ rand(-x..x) } }
       t = Time.now
       q = LLL.reduce(b)
-      p Time.now-t
+      # p Time.now-t
       # p b
       # p q
     end
