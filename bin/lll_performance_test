@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+require_relative "../lib/cryptopals"
+require 'ruby-prof'
+
+
+n = 10
+x = 10**12
+bs = 10.times.map{
+  n.times.map{ n.times.map{ rand(-x..x) } }
+}
+
+RubyProf.start
+# t = Time.now
+bs.each do |b|
+  q = LLL.reduce(b)
+end
+# p Time.now-t
+result = RubyProf.stop
+
+# print a flat profile to text
+RubyProf::FlatPrinter.new(result).print(STDOUT)

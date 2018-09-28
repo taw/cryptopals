@@ -2,20 +2,20 @@ module LLL
   class << self
     def dot(u, v)
       raise unless u.size == v.size
-      result = 0
-      u.size.times do |i|
-        result += u[i] * v[i]
-      end
-      result
+      (0...u.size).map{|i| u[i] * v[i] }.sum
+    end
+
+    def dotself(u)
+      u.map{|ui| ui*ui}.sum
     end
 
     # projection of v onto u
     def proj(u, v)
-      uu = dot(u, u)
-      vu = dot(v, u)
+      uu = dotself(u)
       if uu == 0
         return [0] * u.size
       else
+        vu = dot(v, u)
         u.map{|ui| Rational(ui * vu, uu) }
       end
     end
@@ -24,7 +24,7 @@ module LLL
       q = []
       b.each_with_index do |row, i|
         result = row.dup
-        (0...i).each do |j|
+        i.times do |j|
           qj = q[j]
           z = proj(qj, row)
           result.size.times do |k|
@@ -39,14 +39,15 @@ module LLL
     def reduce(b, delta=0.99)
       b = b.map(&:dup)
       q = gramschmidt(b)
+
       mu = proc do |i,j|
-        v = b[i]
         u = q[j]
-        vu = dot(v,u)
-        uu = dot(u,u)
+        uu = dotself(u)
         if uu == 0
           0
         else
+          v = b[i]
+          vu = dot(v, u)
           Rational(vu, uu)
         end
       end
@@ -56,10 +57,11 @@ module LLL
 
       while k < n
         (k-1).downto(0) do |j|
-          if mu[k,j].abs > Rational(1,2)
+          mukj = mu[k,j]
+          if mukj.abs > Rational(1,2)
+            z = mukj.round
             bk = b[k]
             bj = b[j]
-            z = mu[k,j].round
             n.times do |v|
               bk[v] = bk[v] - z*bj[v]
             end
@@ -67,8 +69,8 @@ module LLL
           end
         end
 
-        qkp2 = dot(q[k-1], q[k-1])
-        qk2 = dot(q[k], q[k])
+        qkp2 = dotself(q[k-1])
+        qk2 = dotself(q[k])
 
         if qk2 >= (delta - mu[k, k-1]**2) * qkp2
           k += 1

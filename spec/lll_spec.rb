@@ -11,6 +11,7 @@ describe LLL do
     it do
       expect(LLL.dot(u,v)).to eq(1*4 + 2*5 + 3*6)
       expect(LLL.dot(u,v)).to eq(LLL.dot(v,u))
+      expect(LLL.dot(u,u)).to eq(LLL.dotself(u))
     end
   end
 
