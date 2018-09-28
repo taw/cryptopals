@@ -25,8 +25,7 @@ module LLL
       b.each_with_index do |row, i|
         result = row.dup
         i.times do |j|
-          qj = q[j]
-          z = proj(qj, row)
+          z = proj(q[j], row)
           result.size.times do |k|
             result[k] -= z[k]
           end
@@ -34,6 +33,29 @@ module LLL
         q << result
       end
       q
+    end
+
+    def update_gramschmidt(b, qorig, range)
+      q = qorig.map(&:dup)
+
+      range.each do |i|
+        row = b[i]
+        result = row.dup
+        i.times do |j|
+          z = proj(q[j], row)
+          result.size.times do |k|
+            result[k] -= z[k]
+          end
+        end
+        q[i] = result
+      end
+
+      # assert_gramschmidt(b, q)
+      q
+    end
+
+    def assert_gramschmidt(b, q)
+      raise "GS incorrect" unless q == gramschmidt(b)
     end
 
     def reduce(b, delta=0.99)
@@ -65,7 +87,7 @@ module LLL
             n.times do |v|
               bk[v] = bk[v] - z*bj[v]
             end
-            q = gramschmidt(b)
+            # assert_gramschmidt(b, q)
           end
         end
 
@@ -76,7 +98,7 @@ module LLL
           k += 1
         else
           b[k], b[k-1] = b[k-1], b[k]
-          q = gramschmidt(b)
+          q = update_gramschmidt(b, q, (k-1)..k)
           k = [k-1, 1].max
         end
       end
