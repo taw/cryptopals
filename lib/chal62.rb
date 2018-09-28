@@ -55,15 +55,16 @@ class Chal62
       }
     end
 
+    # Interpret everything as divided by @pl
     def uts_to_lll_matrix(q, us, ts)
-      ct = Rational(1, pl)
-      cu = Rational(q, pl)
+      ct = 1
+      cu = q
       count = us.size
       matrix = count.times.map{ [0] * (count + 2) }
-      matrix << [*ts, ct, 0]
-      matrix << [*us, 0, cu]
+      matrix << [*ts.map{|t| t*pl}, ct, 0]
+      matrix << [*us.map{|u| u*pl}, 0, cu]
       count.times do |i|
-        matrix[i][i] = q
+        matrix[i][i] = q*pl
       end
       matrix
     end
@@ -82,10 +83,10 @@ class Chal62
 
     def attack(count)
       result = lll_result(count)
-      target = Rational(q, pl)
+      target = q
       matching_row = result.find{|row| row[-1] == target}
       if matching_row
-        (matching_row[-2] * -pl).round
+        -matching_row[-2]
       end
     end
   end
