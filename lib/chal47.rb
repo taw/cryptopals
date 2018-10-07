@@ -71,7 +71,7 @@ class Chal47
           min_s1 = @n.ceil_div(3*@b)
           reset_oracle_call_counter
           si = (min_s1..Float::INFINITY).find{|si_candidate|
-            binding.pry if @tries > 100000 # Shouldn't be > 2**16 unless I'm confused
+            raise "Too many attempts" if @tries > 100000 # Shouldn't be > 2**16 unless I'm confused
             oracle_call( (c0 * si_candidate.powmod(@e, @n)) % @n )
           }
           # puts "Step 2a took #{@tries} Oracle calls"
@@ -80,7 +80,7 @@ class Chal47
           min_si = si+1
           reset_oracle_call_counter
           si = (min_si..Float::INFINITY).find{|si_candidate|
-            binding.pry if @tries > 100000 # Shouldn't be > 2**16 unless I'm confused
+            raise "Too many attempts" if @tries > 100000 # Shouldn't be > 2**16 unless I'm confused
             oracle_call( (c0 * si_candidate.powmod(@e, @n)) % @n )
           }
           # puts "Step 2b took #{@tries} Oracle calls"
