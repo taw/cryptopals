@@ -86,7 +86,7 @@ class Chal62
       target = q
       matching_row = result.find{|row| row[-1] == target}
       if matching_row
-        -matching_row[-2]
+        (-matching_row[-2]) % q
       end
     end
   end
