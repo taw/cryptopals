@@ -141,6 +141,7 @@ module GCM
     end
 
     def counter_block(iv, i)
+      raise "Key size is not 12 bytes" unless iv.size == 12
       iv + [i].pack("N")
     end
 

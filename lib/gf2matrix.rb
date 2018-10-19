@@ -74,6 +74,10 @@ class GF2Matrix
       build(size){|x| x }
     end
 
+    def zero(size)
+      build(size){|x| 0 }
+    end
+
     def random(size)
       max = 2**size - 1
       build(size){ rand(0..max) }
