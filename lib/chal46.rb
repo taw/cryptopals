@@ -17,8 +17,8 @@ class Chal46
   def hack(n, e, ct, oracle)
     k = n.to_s(2).size
     c2 = 2.powmod(e, n)
-    u = BigDecimal.new(n,k)
-    l = BigDecimal.new(0,k)
+    u = BigDecimal(n, k)
+    l = BigDecimal(0, k)
     c = ct
     while l.ceil != u.floor
       c = (c2*c) % n
