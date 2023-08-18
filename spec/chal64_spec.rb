@@ -13,8 +13,8 @@ describe Chal64 do
   end
 
   describe "diff_matrix" do
-    let(:key) { Random::DEFAULT.bytes(16) }
-    let(:iv) { Random::DEFAULT.bytes(12) }
+    let(:key) { Random.bytes(16) }
+    let(:iv) { Random.bytes(12) }
     let(:h) { GCM.calculate_h(key) }
     let(:aad) { "" }
     let(:pt2) { Chal64.apply_diff(pt1, diffs) }
@@ -24,8 +24,8 @@ describe Chal64 do
     let(:dtag) { tag1 ^ tag2 }
 
     describe "1 diff" do
-      let(:pt1) { Random::DEFAULT.bytes(16) }
-      let(:diffs) { [Random::DEFAULT.bytes(16)] }
+      let(:pt1) { Random.bytes(16) }
+      let(:diffs) { [Random.bytes(16)] }
       let(:h2) { GCM.mul(h, h) }
       let(:h2_pt1_c2) { GCM.mul(h2, pt1.to_hex.to_i(16)) }
       let(:h2_pt2_c2) { GCM.mul(h2, pt2.to_hex.to_i(16)) }
@@ -37,8 +37,8 @@ describe Chal64 do
     end
 
     describe "2 diffs" do
-      let(:pt1) { Random::DEFAULT.bytes(16*3) }
-      let(:diffs) { 2.times.map{ Random::DEFAULT.bytes(16) } }
+      let(:pt1) { Random.bytes(16*3) }
+      let(:diffs) { 2.times.map{ Random.bytes(16) } }
       let(:h2) { GCM.mul(h, h) }
       let(:h4) { GCM.mul(h2, h2) }
       let(:h2_pt1_c2) { GCM.mul(h2, pt1[32,16].to_hex.to_i(16)) }
@@ -53,8 +53,8 @@ describe Chal64 do
     end
 
     describe "8 diffs" do
-      let(:pt1) { Random::DEFAULT.bytes(16*256) }
-      let(:diffs) { 8.times.map { Random::DEFAULT.bytes(16) } }
+      let(:pt1) { Random.bytes(16*256) }
+      let(:diffs) { 8.times.map { Random.bytes(16) } }
 
       it do
         expect(diff_matrix * h).to eq(dtag)

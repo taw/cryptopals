@@ -1,7 +1,7 @@
 module AES
   class << self
     def random_key
-      Random::DEFAULT.bytes(16)
+      Random.bytes(16)
     end
 
     def encrypt_block(block, key)

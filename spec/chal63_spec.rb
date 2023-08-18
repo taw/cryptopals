@@ -1,8 +1,8 @@
 describe Chal63 do
   let(:chal) { Chal63.new }
 
-  let(:key) { Random::DEFAULT.bytes(16) }
-  let(:iv) { Random::DEFAULT.bytes(12) }
+  let(:key) { Random.bytes(16) }
+  let(:iv) { Random.bytes(12) }
 
   let(:pt1) { "All your base are belong to us!" }
   let(:aad1) { "Version 1" }

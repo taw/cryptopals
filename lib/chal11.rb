@@ -1,6 +1,6 @@
 class Chal11
   def random_padding
-    Random::DEFAULT.bytes(rand(5..10))
+    Random.bytes(rand(5..10))
   end
 
   def cbc_box

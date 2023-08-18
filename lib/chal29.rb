@@ -1,7 +1,7 @@
 class Chal29
   class Box
     def initialize(secret_size)
-      @secret = Random::DEFAULT.bytes(secret_size)
+      @secret = Random.bytes(secret_size)
     end
 
     # Secure method, hack doesn't get access to the box

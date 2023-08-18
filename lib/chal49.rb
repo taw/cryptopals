@@ -41,7 +41,7 @@ class Chal49
     def generate_transfer_request(from_id, to_id, amount)
       raise "Can only sign messages from own account" unless from_id == @account
       msg = "from=#{from_id}&to=#{to_id.to_i}&amount=#{amount.to_i}"
-      iv = Random::DEFAULT.bytes(16)
+      iv = Random.bytes(16)
       mac = Chal49.cbc_mac(msg, @key, iv)
       (msg + iv + mac)
     end

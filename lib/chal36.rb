@@ -23,7 +23,7 @@ class Chal36
     # Do not save password or x!
     def initialize(email, password)
       @email = email
-      @salt = Random::DEFAULT.bytes(16)
+      @salt = Random.bytes(16)
       x = hash(@salt + password)
       @v = g.powmod(x, n)
     end

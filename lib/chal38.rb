@@ -23,7 +23,7 @@ class Chal38
   class Server < BadSRP
     def initialize(email, password)
       @email = email
-      @salt = Random::DEFAULT.bytes(16)
+      @salt = Random.bytes(16)
       x = hash(@salt + password)
       @v = g.powmod(x, n)
     end
@@ -83,7 +83,7 @@ class Chal38
   class FakeServer < BadSRP
     def round_1_recv(msg)
       @email, @ga = msg
-      @salt = Random::DEFAULT.bytes(16)
+      @salt = Random.bytes(16)
     end
 
     def round_2_send

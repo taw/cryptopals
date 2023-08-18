@@ -6,7 +6,7 @@ class Chal25
       @nonce = rand(2**64)
       @key = AES.random_key
       @size = size
-      @disk = Random::DEFAULT.bytes(@size)
+      @disk = Random.bytes(@size)
     end
 
     def write(ofs, data)

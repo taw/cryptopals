@@ -4,7 +4,7 @@ describe Chal20 do
   let(:samples) { samples_path.readlines.map{|x| Base64.decode64(x) }}
   let(:ctr) { Chal18.new }
   let(:nonce) { 0 }
-  let(:key) { Random::DEFAULT.bytes(16) }
+  let(:key) { Random.bytes(16) }
   let(:encrypted) { samples.map{|s| ctr.encode(s, key, nonce) } }
 
   # Can't get them all this way as sample sizes get tiny

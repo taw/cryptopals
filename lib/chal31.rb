@@ -2,7 +2,7 @@ class Chal31
   class Server
     def initialize
       @data = "All your base are belong to us\n"
-      @key = Random::DEFAULT.bytes(32)
+      @key = Random.bytes(32)
       @mac = OpenSSL::HMAC.hexdigest("MD5", @key, @data)[0, 16]
       # For debugging:
       warn "MAC is #{@mac}"

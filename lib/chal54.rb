@@ -27,7 +27,7 @@ class Chal54
     end
 
     def random_state
-      Random::DEFAULT.bytes(3)
+      Random.bytes(3)
     end
 
     def find_multitarget_collision(state, target_map)

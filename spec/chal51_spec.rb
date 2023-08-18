@@ -24,7 +24,7 @@ describe Chal51 do
   # actual hack
   describe "Hack" do
     let(:chal) { Chal51.new }
-    let(:session_id) { Base64.strict_encode64(Random::DEFAULT.bytes(32)) }
+    let(:session_id) { Base64.strict_encode64(Random.bytes(32)) }
 
     describe "Hacking CTR" do
       let(:box) { Chal51::BoxCTR.new(session_id) }

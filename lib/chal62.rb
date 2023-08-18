@@ -15,7 +15,7 @@ class Chal62
     end
 
     def random_message
-      Random::DEFAULT.bytes(32)
+      Random.bytes(32)
     end
 
     def call

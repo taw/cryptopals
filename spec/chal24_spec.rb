@@ -9,7 +9,7 @@ describe Chal24 do
   end
 
   describe "hack" do
-    let(:plaintext) { Random::DEFAULT.bytes(rand(10..100)) + "A" * 14  }
+    let(:plaintext) { Random.bytes(rand(10..100)) + "A" * 14  }
     let(:key) { Time.now.to_i + rand(-2**15..2**15) }
     let(:cipher) { Chal24::Cipher.new(key) }
     let(:ciphertext) { cipher.encrypt(plaintext) }
