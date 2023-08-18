@@ -6,7 +6,7 @@ describe Chal31 do
   it do
     begin
       thr = Thread.new{
-        Rack::Server.start(app: Chal31::Server.new, Port: 10031)
+        Rackup::Server.start(app: Chal31::Server.new, Port: 10031)
       }
       sleep 1
       expect(hack.hack).to eq("All your base are belong to us\n")
