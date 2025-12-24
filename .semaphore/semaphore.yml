@@ -3,7 +3,7 @@ name: Ruby
 agent:
   machine:
     type: f1-standard-2
-    os_image: ubuntu2004
+    os_image: ubuntu2404
 blocks:
   - name: bundle exec rspec
     task:
@@ -14,4 +14,5 @@ blocks:
             - checkout
             - sem-version ruby 3.2.2
             - bundle install --path vendor/bundle
+            - export OPENSSL_CONF=`pwd`/openssl.conf
             - bundle exec rspec
